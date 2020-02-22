@@ -1,0 +1,37 @@
+2020年02月23日 01:44:00  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=0,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:44:50  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:09  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:09  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:14  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:14  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:19  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:19  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:24  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:24  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:29  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:29  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:34  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:34  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:39  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:39  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:44  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:44  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:49  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:49  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:54  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:54  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:45:59  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:45:59  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:46:04  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:04  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:46:09  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:09  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:46:14  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:14  信息: cj.netos.network.peer.TcpClientHandler - 重新连接成功
+2020年02月23日 01:46:36  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:36  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:46:41  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:41  警告: cj.netos.network.peer.TcpClientHandler - java.net.ConnectException: Connection refused: localhost/127.0.0.1:6600
+2020年02月23日 01:46:46  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000
+2020年02月23日 01:46:46  信息: cj.netos.network.peer.TcpClientHandler - 重新连接成功
+2020年02月23日 01:46:53  信息: cj.netos.network.peer.TcpConnection - 连接属性：workThreadCount=0,heartbeat=5,reconnect_times=0,reconnect_interval=5000

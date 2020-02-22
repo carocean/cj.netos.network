@@ -1,0 +1,8 @@
+rootProject.name = 'cj.netos.network'
+include 'cj.netos.network.corelib'
+include 'cj.netos.network.peer'
+include 'cj.netos.network.node'
+include 'cj.netos.network.start'
+
+include 'cj.netos.network.console'
+include 'cj.netos.network.plugin'

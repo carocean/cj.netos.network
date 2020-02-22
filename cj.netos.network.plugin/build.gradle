@@ -1,0 +1,46 @@
+group 'cj.netos.network'
+version engineer_version
+
+sourceSets {
+    main {
+        java{
+            srcDir "$projectDir/src"
+        }
+        resources{
+            srcDir "$projectDir/src"
+        }
+    }
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+repositories {
+}
+
+dependencies {
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.4.0'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.25'
+    compile group: 'cj.studio.gateway2', name: 'cj.studio.ecm.net', version: ref_cj_studio_ecm_net_version
+    compile project (':cj.netos.network.corelib')
+}
+task copyReferences(type: Copy) {
+    from configurations.compileClasspath.files {
+        include 'snakeyaml-*.jar','cj.studio.ecm.net-*.jar','okhttp-*.jar','okio-*.jar','kotlin-*.jar'
+    }
+    into 'src/cj/references'
+}
+build.dependsOn('copyReferences')
+
+task releaseToCmdline(type: Copy){
+    dependsOn "build"
+    from 'build/libs/'
+    into '../cmdtools/network/plugin'
+    include '**/*.jar'
+    exclude '**/*-javadoc.jar','**/*-sources.jar'
+}
+
+task release(type:Copy){
+    dependsOn "releaseToCmdline"
+}

@@ -1,0 +1,65 @@
+group 'cj.netos.network'
+version engineer_version
+apply plugin:'application'
+mainClassName = "cj.netos.network.start.Entrypoint"
+sourceSets {
+    main {
+        java{
+            srcDir "$projectDir/src"
+        }
+        resources{
+            srcDir "$projectDir/src"
+        }
+    }
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+repositories {
+    mavenCentral();
+}
+jar {
+    manifest {
+        attributes 'Manifest-Version': version,
+                'Class-Path': '.',
+                'Main-Class':'cj.netos.network.start.Entrypoint',
+                'DynamicImport-Package':'*'
+    }
+}
+
+dependencies {
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile project (':cj.netos.network.corelib')
+
+}
+task runnableJar(dependsOn:':cj.netos.network.node:release',type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': version,
+                'Main-Class': 'cj.netos.network.start.Entrypoint'
+    }
+    baseName = 'nodestart'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task releaseNetworkStart(dependsOn: runnableJar,type: Copy) {
+    dependsOn "build"
+    from 'build/libs/'
+    into '../cmdtools/network'
+    include '**/nodestart-*.jar'
+    exclude '**/*-javadoc.jar','**/*-sources.jar'
+}
+
+task release(type: Copy) {
+    dependsOn "releaseNetworkStart",":cj.netos.network.corelib:release",":cj.netos.network.node:release",":cj.netos.network.peer:release",":cj.netos.network.plugin:release"
+    doLast {
+        println 'gateway 环境发布完毕!'
+    }
+}
+tasks.getByPath(':cj.netos.network.node:release').mustRunAfter tasks.getByPath(':cj.netos.network.corelib:release')
+tasks.getByPath(':cj.netos.network.peer:release').mustRunAfter tasks.getByPath(':cj.netos.network.corelib:release')
+tasks.getByPath(':cj.netos.network.plugin:release').mustRunAfter tasks.getByPath(':cj.netos.network.corelib:release')

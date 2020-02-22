@@ -1,0 +1,58 @@
+
+server:
+  #服务地址。目前支持的协议有：tcp,ws,wss,http,https
+  host: tcp://localhost:6600
+  props:
+    workThreadCount: 4
+    bossThreadCount: 1
+    #单位为秒，如果大于0为开启心跳，而客户端未开启心跳的话，服务器将在重启overtimes次后自动关闭客户端。一般服务器开10秒，客户端开5秒，如果服务端开客户端不开则客户端在被闲置时很快掉线
+    heartbeat: 10
+    #检测到心跳包最大掉包次数，超过此数则主动关闭远程客户端，如果为0表示不会主动关闭
+    overtimes: 10
+# 水泵，用于上下行消息的拉取
+pump:
+  upstream:
+    #任务队列数据文件大小,如果超出此文件大小将产生新文件。最小大小一定要大过一个数据对象的大小
+    queue:
+      fileLength: 1048576
+      #等待超时时间，单位毫秒
+      waitTime: 5000
+    workThreadCount: 4
+  downstream:
+    #任务队列数据文件大小,如果超出此文件大小将产生新文件。最小大小一定要大过一个数据对象的大小
+    queue:
+      fileLength: 1048576
+      #等待超时时间，单位毫秒
+      waitTime: 5000
+    workThreadCount: 8
+networkContainer:
+  #是否按请求地址上下文自动创建网络
+  isAutoCreate: false
+  #事件网络，用于订阅一个网络节点的事件通知
+  eventNetwork: event-network
+  netowrks:
+    # castmode:unicast|multicast|selectcast. selectcast分发模式检查请求头中是否含有To-Peer或者To-User，将请求分发到该目标。如果同时均有则均发送
+    # 事件中心网络
+    - event-network:
+        title: 事件中心网络
+        frontend:
+          #每个前置的连接者能收到事件通知
+          #注意：事件中心不支持selectcast分发模式
+          castmode: multicast
+        backend:
+          #后边的管理员能收到所有事件通知
+          castmode: multicast
+    #互动中心网络
+    - interactive-center:
+        title: 互动中心网络
+        frontend:
+          castmode: multicast
+        backend:
+          castmode: unicast
+    #位置更新网络
+    - location-updater:
+        title: 位置更新网络
+        frontend:
+          castmode: multicast
+        backend:
+          castmode: unicast

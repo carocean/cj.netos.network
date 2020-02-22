@@ -1,0 +1,11 @@
+
+appid: system.netos
+appKey: 995C2A861BE8064A1F8A022B5C0D2E36
+appSecret: 6EA4774EE78DCDF0768CA18ECF3AD1DB
+ports:
+  uc.auth: http://47.105.165.186/uc/auth.service
+  uc.platform: http://47.105.165.186/uc/platform/self.service
+okhttp:
+  readTimeout: 5000
+  writeTimeout: 5000
+  connectTimeout: 5000
