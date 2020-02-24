@@ -22,6 +22,11 @@ public class DefaultPrincipal implements IPrincipal {
     }
 
     @Override
+    public String key() {
+        return String.format("%s/%s",principal,peer);
+    }
+
+    @Override
     public String principal() {
         return principal;
     }

@@ -26,7 +26,7 @@ class TcpClientHandler extends SimpleChannelInboundHandler<Object> {
         pipeline = new DefaultPipeline(site);
         IPipelineCombination combination = (IPipelineCombination) site.getService("$.pipelineCombination");
         combination.combine(pipeline);
-        IReconnection connection =(IReconnection) site.getService("$.reconnection");
+        IConnection connection =(IConnection) site.getService("$.connection");
         connection.onopen();
     }
 
@@ -37,7 +37,7 @@ class TcpClientHandler extends SimpleChannelInboundHandler<Object> {
         long heartbeat = (long) site.getService("$.prop.heartbeat");
         long reconnecttimes = (long) site.getService("$.prop.reconnect_times");
         long reconnectinterval = (long) site.getService("$.prop.reconnect_interval");
-        IReconnection connection =(IReconnection) site.getService("$.reconnection");
+        IConnection connection =(IConnection) site.getService("$.connection");
         if (heartbeat > 0 && !connection.isForbiddenReconnect()) {
             boolean succeed = false;
             for (long i = 0; reconnecttimes > 0 ? (i < reconnecttimes) : true; i++) {//重试次数
@@ -61,10 +61,11 @@ class TcpClientHandler extends SimpleChannelInboundHandler<Object> {
             }
             return;
         }
-        connection.onclose();
         IPipelineCombination combination = (IPipelineCombination) site.getService("$.pipelineCombination");
         combination.demolish(pipeline);
+        pipeline.dispose();
         pipeline = null;
+        connection.onclose();
     }
 
     @Override
@@ -111,7 +112,6 @@ class TcpClientHandler extends SimpleChannelInboundHandler<Object> {
         if (frame == null) {
             return;
         }
-        System.out.println("############"+frame);
         //上下文路径是网络名，二级路径是请求名
 //        String networkName = frame.rootName();
 //        frame.url(frame.relativeUrl());

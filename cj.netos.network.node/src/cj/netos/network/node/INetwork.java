@@ -1,16 +1,13 @@
 package cj.netos.network.node;
 
-import cj.netos.network.Castmode;
-import cj.netos.network.IPrincipal;
-import cj.netos.network.NetworkFrame;
+import cj.netos.network.*;
 import cj.studio.ecm.net.CircuitException;
 
 import java.util.Set;
 
 public interface INetwork {
 
-    void cast(NetworkFrame frame) throws CircuitException;
-
+    void cast(Sender sender,NetworkFrame frame) throws CircuitException;
 
     INetworkSink getFrontendSink(String endpointKey);
 
@@ -24,9 +21,9 @@ public interface INetwork {
 
     String getTitle();
 
-    Castmode getFrontendCastmode();
+    FrontendCastmode getFrontendCastmode();
 
-    Castmode getBackendCastmode();
+    BackendCastmode getBackendCastmode();
 
     INetworkSink getFrontendSink(IPrincipal principal);
 
@@ -36,6 +33,8 @@ public interface INetwork {
 
     void join(IPrincipal principal, boolean joinToFrontend);
 
-    void leave(IPrincipal principal, boolean isLeaveFrontend);
+    void leave(IPrincipal principal);
+
+    void close();
 
 }

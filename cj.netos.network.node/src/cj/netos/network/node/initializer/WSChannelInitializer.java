@@ -56,7 +56,7 @@ public class WSChannelInitializer extends ChannelInitializer<SocketChannel> {
         ch.pipeline().addLast(new ChunkedWriteHandler());
         pipeline.addLast(new MyWebSocketProtocolHandler(wspath));
         if (heartbeat > 0) {
-            pipeline.addLast(new IdleStateHandler(0, 0, heartbeat, TimeUnit.SECONDS));
+            pipeline.addLast(new IdleStateHandler(heartbeat, 0, 0, TimeUnit.SECONDS));
         }
         pipeline.addLast(new WSChannelHandler(parent));
     }

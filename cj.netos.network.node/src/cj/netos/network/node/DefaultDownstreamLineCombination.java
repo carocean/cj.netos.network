@@ -44,7 +44,7 @@ public class DefaultDownstreamLineCombination implements ILineCombination {
                     if (frame == null) {
                         break;
                     }
-                    System.out.println("!!!!!!combineDownstream!!!!" + frame);
+//                    System.out.println("!!!!!!combineDownstream!!!!" + frame);
                     endpointer.downstream(frame, task.getNetwork());
                     //正确消费完就移除
                     networkSink.removeFirst();

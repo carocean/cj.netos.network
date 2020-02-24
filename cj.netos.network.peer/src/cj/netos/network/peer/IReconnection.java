@@ -5,8 +5,6 @@ interface IReconnection {
 
     boolean isForbiddenReconnect();
 
-    void onclose();
-
-    void onopen();
+    void accept(IOnreconnection onreconnection);
 
 }

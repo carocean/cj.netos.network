@@ -1,7 +1,6 @@
 package cj.netos.network;
 
-import cj.netos.network.peer.IPeer;
-import cj.netos.network.peer.Peer;
+import cj.netos.network.peer.*;
 import org.apache.commons.cli.*;
 import org.apache.log4j.PropertyConfigurator;
 
@@ -38,11 +37,39 @@ public class PeerEntrypoint {
         File consoleFile = getHomeDir(fileName, line);
         PropertyConfigurator.configure(String.format("%s%sconf%slog4j.properties", consoleFile.getParent(), File.separator, File.separator));
 
-        IPeer peer = Peer.connect(url);
+        IPeer peer = Peer.connect(url, new IOnopen() {
+            @Override
+            public void onopen() {
+                System.out.println("*********************************************");
+                System.out.println("*************已打开。欢迎使用******************");
+            }
+        }, new IOnclose() {
+            @Override
+            public void onclose() {
+                System.out.println("*************已关闭。色友那啦******************");
+                System.exit(0);
+            }
+
+        }, new IOnnotify() {
+            @Override
+            public void onevent(NetworkFrame frame) {
+                System.out.println(String.format("--------------系统事件响应--------------------"));
+                System.out.println(new String(frame.toBytes()));
+                System.out.println("--------------end");
+            }
+
+            @Override
+            public void onerror(NetworkFrame frame) {
+                System.out.println(String.format("--------------系统异常响应--------------------"));
+                System.out.println(new String(frame.toBytes()));
+                System.out.println("--------------end");
+            }
+
+        });
         //"tcp://localhost:6600?workThreadCount=8"
         IMonitor console = new PeerMonitor();
         try {
-            console.moniter(peer);
+            console.moniter(peer, null);
         } catch (Exception e) {
             e.printStackTrace();
             return;

@@ -1,9 +1,7 @@
 package cj.netos.network.node;
 
-import cj.netos.network.Castmode;
-import cj.netos.network.INetworkServiceProvider;
-import cj.netos.network.IPrincipal;
-import cj.netos.network.NetworkFrame;
+import cj.netos.network.*;
+import cj.netos.network.node.eventloop.Task;
 import cj.studio.ecm.CJSystem;
 import cj.studio.ecm.net.CircuitException;
 
@@ -14,11 +12,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 //逻辑网络
 public class DefaultNetwork implements INetwork {
 
-    private final INetworkServiceProvider site;
+    private INetworkServiceProvider site;
     private final String name;
     private final String title;
-    private final Castmode frontendCastmode;
-    private final Castmode backendCastmode;
+    private final FrontendCastmode frontendCastmode;
+    private final BackendCastmode backendCastmode;
     private Map<String, INetworkSink> frontendSinks;
     private List<String> index_frontendSinks;
     private Map<String, INetworkSink> backendSinks;
@@ -37,7 +35,7 @@ public class DefaultNetwork implements INetwork {
 
     }
 
-    public DefaultNetwork(INetworkServiceProvider site, String name, String title, Castmode frontendCastmode, Castmode backendCastmode) {
+    public DefaultNetwork(INetworkServiceProvider site, String name, String title, FrontendCastmode frontendCastmode, BackendCastmode backendCastmode) {
         this.site = site;
         frontendSinks = new HashMap<>();
         backendSinks = new HashMap<>();
@@ -48,28 +46,60 @@ public class DefaultNetwork implements INetwork {
     }
 
     @Override
-    public void cast(NetworkFrame frame) throws CircuitException {
+    public void cast(Sender sender, NetworkFrame frame) throws CircuitException {
+        _checkframeUrl(frame);
+
         switch (backendCastmode) {
             case unicast:
-                _unicast(frame, backendSinks, index_backendSinks);
+                _unicast(sender, frame, backendSinks, index_backendSinks);
                 break;
             case multicast:
-                _multicast(frame, backendSinks, index_backendSinks);
+                _multicast(sender, frame, backendSinks, index_backendSinks);
                 break;
             case selectcast:
                 _selectcast(frame, backendSinks, index_backendSinks);
                 break;
+            case forbiddenBackendCastButAllowFrontendUnicast:
+                //前置过来的可向后置分发，而后置过来的被禁止在后置传播。但后置发来的消息可以在下面switch分发给前置
+                if (!isBackendSender(sender)) {
+                    _unicast(sender, frame, backendSinks, index_backendSinks);
+                }
+                break;
+            case forbiddenBackendCastButAllowFrontendMulticast:
+                if (!isBackendSender(sender)) {
+                    _multicast(sender, frame, backendSinks, index_backendSinks);
+                }
+                break;
+            case forbiddenBackendCastButAllowFrontendSelectcast:
+                if (!isBackendSender(sender)) {
+                    _selectcast(frame, backendSinks, index_backendSinks);
+                }
+                break;
         }
+
         switch (frontendCastmode) {
             case unicast:
-                _unicast(frame, frontendSinks, index_frontendSinks);
+                _unicast(sender, frame, frontendSinks, index_frontendSinks);
                 break;
             case multicast:
-                _multicast(frame, frontendSinks, index_frontendSinks);
+                _multicast(sender, frame, frontendSinks, index_frontendSinks);
                 break;
             case selectcast:
                 _selectcast(frame, frontendSinks, index_frontendSinks);
                 break;
+        }
+    }
+
+    private boolean isBackendSender(Sender sender) {
+        return backendSinks.containsKey(String.format("%s/%s", sender.getPerson(), sender.getPeer()));
+    }
+
+    private void _checkframeUrl(NetworkFrame frame) {
+        String name = frame.rootName();
+        if (!this.name.equals(name)) {
+            String old = frame.url();
+            String url = String.format("/%s%s", this.name, old);
+            frame.url(url);
         }
     }
 
@@ -85,9 +115,13 @@ public class DefaultNetwork implements INetwork {
         sink.write(frame);
     }
 
-    private void _multicast(NetworkFrame frame, Map<String, INetworkSink> sinks, List<String> index) {
+    private boolean _isSelf(String protocol, String sinkKey, String sendKey) {
+        return !"network/1.0".equalsIgnoreCase(protocol) && sinkKey.equals(sendKey);
+    }
+
+    private void _multicast(Sender sender, NetworkFrame frame, Map<String, INetworkSink> sinks, List<String> index) {
         for (Map.Entry<String, INetworkSink> entry : sinks.entrySet()) {
-            if (entry == null) {
+            if (entry == null || /*不发自身但必须排除network/1.0协议*/_isSelf(frame.protocol(), entry.getKey(), sender.getKey())) {
                 continue;
             }
             INetworkSink sink = entry.getValue();
@@ -95,12 +129,21 @@ public class DefaultNetwork implements INetwork {
         }
     }
 
-    private void _unicast(NetworkFrame frame, Map<String, INetworkSink> sinks, List<String> index) {
+    private void _unicast(Sender sender, NetworkFrame frame, Map<String, INetworkSink> sinks, List<String> index) {
         if (index.isEmpty()) {
             return;
         }
         int pos = Math.abs(String.format("%s%s", System.currentTimeMillis(), frame.toString()).hashCode()) % index.size();
-        String key = index.get(pos);
+        String key = "";
+        if (!"network/1.0".equalsIgnoreCase(frame.protocol())) {
+            List<String> copy = new ArrayList<>();
+            copy.addAll(index);
+            //不发自身
+            copy.remove(sender.getKey());
+            key = copy.get(pos);
+        } else {
+            key = index.get(pos);
+        }
         INetworkSink sink = sinks.get(key);
         if (sink == null) {
             CJSystem.logging().warn(getClass(), "未找到分发目标，该侦丢弃");
@@ -137,19 +180,14 @@ public class DefaultNetwork implements INetwork {
     }
 
     @Override
-    public void leave(IPrincipal principal, boolean isLeaveFrontend) {
-        if (isLeaveFrontend) {
-            INetworkSink sink = getFrontendSink(principal);
-            if (sink == null) {
-                return;
-            }
+    public void leave(IPrincipal principal) {
+        INetworkSink sink = getFrontendSink(principal);
+        if (sink != null) {
             sink.close();
             removeFrontendSink(sink);
-        } else {
-            INetworkSink sink = getBackendSink(principal);
-            if (sink == null) {
-                return;
-            }
+        }
+        sink = getBackendSink(principal);
+        if (sink != null) {
             sink.close();
             removeBackendSink(sink);
         }
@@ -194,12 +232,12 @@ public class DefaultNetwork implements INetwork {
     }
 
     @Override
-    public Castmode getFrontendCastmode() {
+    public FrontendCastmode getFrontendCastmode() {
         return frontendCastmode;
     }
 
     @Override
-    public Castmode getBackendCastmode() {
+    public BackendCastmode getBackendCastmode() {
         return backendCastmode;
     }
 
@@ -215,4 +253,16 @@ public class DefaultNetwork implements INetwork {
         return backendSinks.get(key);
     }
 
+    @Override
+    public void close() {
+        if (this.backendSinks != null)
+            this.backendSinks.clear();
+        if (this.frontendSinks != null)
+            this.frontendSinks.clear();
+        if (this.index_frontendSinks != null)
+            this.index_frontendSinks.clear();
+        if (this.index_backendSinks != null)
+            this.index_backendSinks.clear();
+        this.site = null;
+    }
 }

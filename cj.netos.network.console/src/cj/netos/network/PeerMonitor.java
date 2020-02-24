@@ -1,8 +1,7 @@
 package cj.netos.network;
 
 
-import cj.netos.network.cmd.PwdCommand;
-import cj.netos.network.cmd.TokenCommand;
+import cj.netos.network.cmd.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +12,11 @@ public class PeerMonitor extends BaseMonitor {
     @Override
     protected boolean isExit(String text) {
         return "bye".equals(text) || "exit".equals(text);
+    }
+
+    @Override
+    protected boolean checkExitOnAfterCommand(String text) {
+        return false;
     }
 
     @Override
@@ -32,16 +36,18 @@ public class PeerMonitor extends BaseMonitor {
         cmds.put(pwd.cmd(), pwd);
         Command token = new TokenCommand();
         cmds.put(token.cmd(), token);
-//        Command remove = new RemoveNetworkCommand();
-//        cmds.put(remove.cmd(), remove);
-//        Command exists = new ExistsNetworkCommand();
-//        cmds.put(exists.cmd(), exists);
-//        Command rename = new RenameNetworkCommand();
-//        cmds.put(rename.cmd(), rename);
-//        Command castmode = new CastmodeNetworkCommand();
-//        cmds.put(castmode.cmd(), castmode);
-//        Command listen = new ListenNetworkCommand(this.childMonitorController);
-//        cmds.put(listen.cmd(), listen);
+        Command create = new CreateCommand();
+        cmds.put(create.cmd(), create);
+        Command remove = new RemoveCommand();
+        cmds.put(remove.cmd(), remove);
+        Command list = new ListCommand();
+        cmds.put(list.cmd(), list);
+        Command listen = new ListenCommand();
+        cmds.put(listen.cmd(), listen);
+        Command cd = new CdCommand();
+        cmds.put(cd.cmd(), cd);
+        Command vs = new ViewServerCommand();
+        cmds.put(vs.cmd(), vs);
         return cmds;
     }
 }

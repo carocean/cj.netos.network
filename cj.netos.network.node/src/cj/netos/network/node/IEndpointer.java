@@ -3,16 +3,18 @@ package cj.netos.network.node;
 import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
-import cj.netos.network.TransferMode;
 import io.netty.channel.Channel;
-import org.apache.jdbm.DB;
 
 import java.util.Map;
 
 public interface IEndpointer {
+    ChannelWriter getChannelWriter();
+
+    Channel getChannel();
+
     String key();
 
-    void upstream(NetworkFrame frame);
+    void upstream(IPrincipal principal, NetworkFrame frame);
 
     void close();
 
@@ -22,7 +24,7 @@ public interface IEndpointer {
 
     void open(IPrincipal principal, Channel channel, INetworkServiceProvider site);
 
-    void joinNetwork(String network, TransferMode mode);
+    void joinNetwork(String network);
 
     void leaveNetwork(String network);
 

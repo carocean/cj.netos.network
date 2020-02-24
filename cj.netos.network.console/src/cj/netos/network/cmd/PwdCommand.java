@@ -40,19 +40,19 @@ public class PwdCommand extends Command {
         String peerName = line.getOptionValue("n");
         if (StringUtil.isEmpty(peerName)) {
             System.out.println("缺少参数-n");
-            return false;
+            return true;
         }
         String person = line.getOptionValue("u");
         if (StringUtil.isEmpty(person)) {
             System.out.println("缺少参数-u");
-            return false;
+            return true;
         }
         String pwd = line.getOptionValue("p");
         if (StringUtil.isEmpty(pwd)) {
             System.out.println("缺少参数-p");
-            return false;
+            return true;
         }
         peer.authByPassword(peerName, person, pwd);
-        return false;
+        return true;
     }
 }

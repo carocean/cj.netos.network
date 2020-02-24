@@ -29,6 +29,7 @@ public class DispatchCommandValve implements IValve {
         registerCommand(new RemoveNetworkCommand(site));
         registerCommand(new ViewNetworkCommand(site));
         registerCommand(new AuthNotifyNetworkCommand(site));
+        registerCommand(new ViewServerCommand(site));
     }
 
     private void registerCommand(INetworkCommand command) {
@@ -57,7 +58,7 @@ public class DispatchCommandValve implements IValve {
         if (!checkRights.checkRights(command.getInstruction(), principal)) {
             CircuitException e = new CircuitException("803", "没有执行权限：" + frame.command());
             nextError(frame, e, pipeline);
-            channel.close();
+//            channel.close();
             throw e;
         }
         command.exec(frame, principal, channel);

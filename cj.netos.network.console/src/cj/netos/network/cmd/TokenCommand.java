@@ -36,9 +36,9 @@ public class TokenCommand extends Command {
         String token = line.getOptionValue("t");
         if (StringUtil.isEmpty(token)) {
             System.out.println("缺少参数-t");
-            return false;
+            return true;
         }
         peer.authByAccessToken(token);
-        return false;
+        return true;
     }
 }

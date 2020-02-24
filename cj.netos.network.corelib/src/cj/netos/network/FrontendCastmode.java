@@ -1,5 +1,5 @@
 package cj.netos.network;
 
-public enum Castmode {
+public enum FrontendCastmode {
     unicast, multicast, selectcast
 }

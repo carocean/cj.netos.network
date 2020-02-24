@@ -13,7 +13,7 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
 public class ChannelWriter {
-    public static void write(Channel channel, NetworkFrame frame) {
+    public void write(Channel channel, NetworkFrame frame) {
         AttributeKey<String> key = AttributeKey.valueOf("Net-Protocol");
         String protocol = channel.attr(key).get();
         switch (protocol) {

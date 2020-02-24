@@ -57,7 +57,7 @@ public class NetworkNode implements INetworkNode {
             f.mkdirs();
         }
         storeDir=String.format("%s%sdb_",storeDir,File.separator);
-        return DBMaker.openFile(storeDir).closeOnExit().disableCache().disableLocking().disableTransactions().make();
+        return DBMaker.openFile(storeDir).closeOnExit().make();
     }
 
 

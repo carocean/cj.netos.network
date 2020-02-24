@@ -40,6 +40,11 @@ public class AuthValve implements IValve {
             pipeline.nextFlow(frame, this);
             return;
         }
+        if (!"auth".equals(frame.command())) {
+            CircuitException e= new CircuitException("801", "未登录认证，拒绝访问服务");
+            nextError(frame,e,pipeline);
+            throw e;
+        }
         String authMode = "";
         if (frame.containsHead("auth-mode")) {
             authMode = frame.head("auth-mode");
@@ -48,7 +53,9 @@ public class AuthValve implements IValve {
             authMode = frame.parameter("auth-mode");
         }
         if (StringUtil.isEmpty(authMode)) {
-            throw new CircuitException("404", "未指定认证模式");
+            CircuitException e= new CircuitException("404", "未指定认证模式");
+            nextError(frame,e,pipeline);
+            throw e;
         }
         AuthMode mode = AuthMode.valueOf(authMode);
         switch (mode) {

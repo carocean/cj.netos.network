@@ -12,6 +12,7 @@ public class ServerInfo {
     String host;
     int port;
     Map<String,Object> props;
+    private String openports;
 
     @Override
     public String toString() {
@@ -24,6 +25,7 @@ public class ServerInfo {
         if (server == null) {
             throw new EcmException(String.format("缺少server配置，在文件：node.yaml"));
         }
+        openports = (String) server.get("openports");
         String h = (String) server.get("host");
         if (StringUtil.isEmpty(h)) {
             throw new EcmException(String.format("server配置缺少host，在文件：node.yaml"));
@@ -52,6 +54,10 @@ public class ServerInfo {
        Map<String,Object> props= (Map<String, Object>) server.get("props");
        this.props.putAll(props);
        props.clear();
+    }
+
+    public String getOpenports() {
+        return openports;
     }
 
     public String getProtocol() {

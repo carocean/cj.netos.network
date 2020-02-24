@@ -1,14 +1,15 @@
 package cj.netos.network.node;
 
-import cj.netos.network.Castmode;
+import cj.netos.network.BackendCastmode;
+import cj.netos.network.FrontendCastmode;
 
 import java.util.Map;
 
 public class NetworkInfo {
     String name;
     String title;
-    Castmode frontendCastMode;
-    Castmode backendCastmode;
+    FrontendCastmode frontendCastMode;
+    BackendCastmode backendCastmode;
 
     public void parse(Map<String, Object> item) {
         for (Map.Entry<String, Object> en : item.entrySet()) {
@@ -26,7 +27,7 @@ public class NetworkInfo {
         for (Map.Entry<String, Object> en : frontend.entrySet()) {
             if ("castmode".equals(en.getKey())) {
                 String castmode = (String) en.getValue();
-                frontendCastMode = Castmode.valueOf(castmode);
+                frontendCastMode = FrontendCastmode.valueOf(castmode);
             }
             break;
         }
@@ -34,17 +35,17 @@ public class NetworkInfo {
         for (Map.Entry<String, Object> en : backend.entrySet()) {
             if ("castmode".equals(en.getKey())) {
                 String castmode = (String) en.getValue();
-                backendCastmode = Castmode.valueOf(castmode);
+                backendCastmode = BackendCastmode.valueOf(castmode);
             }
             break;
         }
     }
 
-    public Castmode getBackendCastmode() {
+    public BackendCastmode getBackendCastmode() {
         return backendCastmode;
     }
 
-    public Castmode getFrontendCastMode() {
+    public FrontendCastmode getFrontendCastMode() {
         return frontendCastMode;
     }
 

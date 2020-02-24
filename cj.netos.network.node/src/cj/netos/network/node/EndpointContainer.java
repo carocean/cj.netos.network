@@ -3,14 +3,17 @@ package cj.netos.network.node;
 import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
-import cj.netos.network.TransferMode;
+import cj.netos.network.Sender;
 import cj.studio.ecm.net.CircuitException;
 import io.netty.channel.Channel;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.apache.jdbm.DB;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class EndpointContainer implements IEndpointerContainer {
     Map<String, IEndpointer> endpointers;//key是person/device
@@ -36,10 +39,35 @@ public class EndpointContainer implements IEndpointerContainer {
         if (endpointer == null) {
             return;
         }
+        offline(endpointer);
+
+        Map<String, IEndpointerSink> sinks = endpointer.getSinks();
+        AttributeKey<IPrincipal> keyP = AttributeKey.valueOf("Principal-Key");
+        Attribute<IPrincipal> attribute = channel.attr(keyP);
+        if (attribute != null) {
+            IPrincipal principal = attribute.get();
+            for (IEndpointerSink sink : sinks.values()) {
+                if (sink == null) {
+                    continue;
+                }
+                networkContainer.leaveNetwork(principal, sink.getNetwork());
+            }
+        }
         endpointer.close();
         index.remove(id);
         endpointers.remove(key);
-        offline(endpointer);
+
+    }
+
+    @Override
+    public IEndpointer availableEndpoint() {
+        if (endpointers.isEmpty()) {
+            return null;
+        }
+        for (Map.Entry<String, IEndpointer> entry : endpointers.entrySet()) {
+            return entry.getValue();
+        }
+        return null;
     }
 
     @Override
@@ -68,21 +96,45 @@ public class EndpointContainer implements IEndpointerContainer {
     }
 
     protected void offline(IEndpointer endpointer) throws CircuitException {
-        networkContainer.offline(endpointer);
+        IPrincipal principal = endpointer.getPrincipal();
+
+        NetworkFrame back = new NetworkFrame("offline /systemm/notify/ network/1.0");
+        if (principal != null) {
+            back.head("sender-person", principal.principal());
+            back.head("sender-peer", principal.peer());
+        }
+        back.head("status", "200");
+        back.head("message", "OK");
+        endpointer.getChannelWriter().write(endpointer.getChannel(), back);
+
+        NetworkFrame frame = new NetworkFrame(String.format("offline /%s/notify/ network/1.0", this.networkContainer.getEventNetwork()));
+        endpointer.upstream(principal, frame);
     }
 
     protected void online(IEndpointer endpointer) throws CircuitException {
-        networkContainer.online(endpointer);
+        IPrincipal principal = endpointer.getPrincipal();
+
+        NetworkFrame back = new NetworkFrame("online /system/notify/ network/1.0");
+        if (principal != null) {
+            back.head("sender-person", principal.principal());
+            back.head("sender-peer", principal.peer());
+        }
+        back.head("status", "200");
+        back.head("message", "OK");
+        endpointer.getChannelWriter().write(endpointer.getChannel(), back);
+
+        NetworkFrame frame = new NetworkFrame(String.format("online /%s/notify/ network/1.0", this.networkContainer.getEventNetwork()));
+        endpointer.upstream(principal, frame);
     }
 
     @Override
-    public void onJoinNetwork(IPrincipal principal, String network, TransferMode mode) {
+    public void onJoinNetwork(IPrincipal principal, String network) {
         String key = String.format("%s/%s", principal.principal(), principal.peer());
         IEndpointer endpointer = this.endpointers.get(key);
         if (endpointer == null) {
             return;
         }
-        endpointer.joinNetwork(network, mode);
+        endpointer.joinNetwork(network);
     }
 
     @Override
@@ -104,15 +156,16 @@ public class EndpointContainer implements IEndpointerContainer {
         if (_storableList == null) {
             _storableList = db.createLinkedList(dbname);
         }
-        return new _SinkPuller(_storableList,db);
+        return new _SinkPuller(_storableList, db);
     }
 
     class _SinkPuller implements ISinkPull {
         List<?> storableList;
         DB db;
+
         public _SinkPuller(List<?> storableList, DB db) {
             this.storableList = storableList;
-            this.db=db;
+            this.db = db;
         }
 
         @Override
@@ -120,7 +173,7 @@ public class EndpointContainer implements IEndpointerContainer {
             if (storableList.isEmpty()) {
                 return null;
             }
-            byte[] bytes =null;
+            byte[] bytes = null;
             try {
                 bytes = (byte[]) storableList.get(0);
             } catch (IndexOutOfBoundsException e) {

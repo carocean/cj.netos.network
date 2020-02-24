@@ -1,6 +1,7 @@
 package cj.netos.network.node;
 
 import cj.netos.network.NetworkFrame;
+import cj.netos.network.Sender;
 import cj.netos.network.node.eventloop.ILine;
 import cj.netos.network.node.eventloop.ILineCombination;
 import cj.netos.network.node.eventloop.IReceiver;
@@ -38,9 +39,10 @@ public class DefaultUpstreamLineCombination implements ILineCombination {
                         if (frame == null) {
                             break;
                         }
-                        System.out.println("!!!!!!combineUpstream!!!!" + frame);
+//                        System.out.println("!!!!!!combineUpstream!!!!" + frame);
                         INetwork network = networkContainer.getNetwork(task.getNetwork());
-                        network.cast(frame);
+                        Sender sender=new Sender(task.getEndpoint());
+                        network.cast(sender,frame);
                         //正确消费完就移除
                         sinkPull.removeFirst();
                     }
@@ -54,9 +56,10 @@ public class DefaultUpstreamLineCombination implements ILineCombination {
                     if (frame == null) {
                         break;
                     }
-                    System.out.println("!!!!!!combineUpstream!!!!" + frame);
+//                    System.out.println("!!!!!!combineUpstream!!!!" + frame);
                     INetwork network = networkContainer.getNetwork(task.getNetwork());
-                    network.cast(frame);
+                    Sender sender=new Sender(task.getEndpoint());
+                    network.cast(sender,frame);
                     //正确消费完就移除
                     endpointerSink.removeFirst();
                 }

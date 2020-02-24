@@ -58,10 +58,15 @@ public class WSChannelHandler extends SimpleChannelInboundHandler<Object> {
         }
 
     }
+    //netty的坑，必须将counter放到channelRead方法，messageReceived会漏掉
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        counter = 0;
+        super.channelRead(ctx, msg);
+    }
 
     @Override
     protected void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
-        counter = 0;
         if (msg instanceof PingWebSocketFrame) {
             ((WebSocketFrame) msg).content().retain();
             ctx.channel().writeAndFlush(new PongWebSocketFrame(((WebSocketFrame) msg).content()));
@@ -96,11 +101,7 @@ public class WSChannelHandler extends SimpleChannelInboundHandler<Object> {
         if (frame == null || frame.isInvalid()) {
             return;
         }
-        String network = frame.rootName();
-        if (StringUtil.isEmpty(network)) {
-            CJSystem.logging().warn(getClass(), "忽略该上下文为/的请求侦");
-            return;
-        }
+
         //以下路由到所请求的通道
         try {
             pipeline.input(frame);

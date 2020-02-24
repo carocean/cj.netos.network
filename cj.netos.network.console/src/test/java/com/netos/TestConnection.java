@@ -12,7 +12,7 @@ import java.util.Map;
 public class TestConnection {
 
     public static IConnection getConn() {
-        IConnection connection = new TcpConnection();
+        IConnection connection = new TcpConnection(null,null,null);
         Map<String, String> props = new HashMap<>();
         props.put("heartbeat","5");
         connection.connect("tcp", "localhost", 6600, props);

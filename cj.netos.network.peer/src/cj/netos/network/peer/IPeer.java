@@ -1,18 +1,33 @@
 package cj.netos.network.peer;
 
+import cj.netos.network.BackendCastmode;
+import cj.netos.network.FrontendCastmode;
+
+import java.util.Set;
+
 public interface IPeer {
 
     void authByPassword(String peer,String person, String password);
 
     void authByAccessToken(String accessToken);
 
-    void listEventNetwork(IOnerror onerror, IOnopen onopen, IOnmessage onmessage, IOnclose onclose);
+    ILogicNetwork listen(String networkName,boolean isJoinToFrontend);
 
-    ILogicNetwork listen(String networkName);
+    ILogicNetwork localNetwork(String networkName);
+
+    Set<String> enumLocalNetwork();
+
+    void createNetwork(String networkName, String title, FrontendCastmode frontendCastmode, BackendCastmode backendCastmode);
+
+    void removeNetwork(String networkName);
+
+    void listNetwork();
 
     void close();
 
-    String peerName();
+    void removeLogicNetwork(ILogicNetwork network);
+
+    void viewServer();
 
 }
 

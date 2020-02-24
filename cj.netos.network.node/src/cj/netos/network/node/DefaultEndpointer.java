@@ -3,20 +3,19 @@ package cj.netos.network.node;
 import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
-import cj.netos.network.TransferMode;
 import cj.studio.ecm.CJSystem;
 import io.netty.channel.Channel;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 //终结点，它拥有一个接收队列
-public class DefaultEndpointer implements IEndpointer {
+public class DefaultEndpointer extends ChannelWriter implements IEndpointer {
     INetworkServiceProvider site;
     IPrincipal principal;
     Channel channel;
     Map<String, IEndpointerSink> sinks;
+    String eventNetwork;
 
     @Override
     public void close() {
@@ -25,6 +24,14 @@ public class DefaultEndpointer implements IEndpointer {
         }
         sinks.clear();
         site = null;
+    }
+    @Override
+    public  ChannelWriter getChannelWriter(){
+        return  this;
+    }
+    @Override
+    public Channel getChannel() {
+        return channel;
     }
 
     @Override
@@ -48,12 +55,17 @@ public class DefaultEndpointer implements IEndpointer {
         this.principal = principal;
         this.channel = channel;
         this.sinks = new ConcurrentHashMap<>();
+        INetworkNodeConfig config = (INetworkNodeConfig) site.getService("$.network.config");
+        this.eventNetwork = config.getNetworkConfig().getEventNetwork();
     }
 
     @Override
-    public void joinNetwork(String network, TransferMode mode) {
+    public void joinNetwork(String network) {
+        if (sinks.containsKey(network)) {
+            return;
+        }
         IEndpointerSink sink = new DefaultEndpointerSink();
-        sink.open(key(), network, mode, site);
+        sink.open(key(), network, site);
         sinks.put(network, sink);
     }
 
@@ -66,13 +78,31 @@ public class DefaultEndpointer implements IEndpointer {
         }
     }
 
+    private boolean isSendToEventNetwork(NetworkFrame frame) {
+        return "NETWORK/1.0".equalsIgnoreCase(frame.protocol()) && frame.rootName().equals(eventNetwork);
+    }
 
     @Override
-    public void upstream(NetworkFrame frame) {
+    public void upstream(IPrincipal principal, NetworkFrame frame) {
+        if (principal != null) {
+            frame.head("sender-person", principal.principal());
+            frame.head("sender-peer", principal.peer());
+        }
+        if (!frame.containsHead("status")) {
+            frame.head("status", "200");
+        }
+        if (!frame.containsHead("message")) {
+            frame.head("message", "OK");
+        }
         String network = frame.rootName();
         if (!this.sinks.containsKey(network)) {
-            CJSystem.logging().warn(getClass(), String.format("禁止向非侦听的网络%s发送，侦被丢弃", network));
-            return;
+            if (!isSendToEventNetwork(frame)) {
+                CJSystem.logging().warn(getClass(), String.format("禁止向非侦听的网络%s发送，侦被丢弃", network));
+                return;
+            }
+            IEndpointerSink sink = new DefaultEndpointerSink();
+            sink.open(key(), network, site);
+            sinks.put(network, sink);
         }
         IEndpointerSink sink = sinks.get(network);
         sink.write(frame);
@@ -80,21 +110,7 @@ public class DefaultEndpointer implements IEndpointer {
 
     @Override
     public synchronized boolean downstream(NetworkFrame frame, String fromNetwork) {
-        IEndpointerSink sink = sinks.get(fromNetwork);
-        TransferMode mode = TransferMode.push;
-        if (sink != null) {
-            mode = sink.getMode();
-        }
-        if (mode == TransferMode.push) {
-            //非netty线程下不能回写
-            ChannelWriter.write(channel, frame);
-            return true;
-        }
-        //其下为拉而设置侦
-//        if (_notEmpty.get() != null) {
-//            return false;
-//        }
-//        _notEmpty.set(frame);
+        write(channel, frame);
         return true;
     }
 

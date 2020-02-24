@@ -17,9 +17,12 @@ import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class TcpConnection implements IConnection ,IReconnection, INetworkServiceProvider {
+public class TcpConnection implements IConnection, IReconnection, INetworkServiceProvider {
+    private final IOnopen onopen;
+    private final IOnclose onclose;
     EventLoopGroup exepool;
     private Channel channel;
     private String protocol;
@@ -32,10 +35,17 @@ public class TcpConnection implements IConnection ,IReconnection, INetworkServic
     private int workThreadCount;
     private boolean forbiddenReconnect;
 
-    IPipelineCombination pipelineCombination;
+    DefaultPipelineCombination pipelineCombination;
+    private IOnreconnection onreconnection;
+
+    public TcpConnection(IOnopen onopen, IOnclose onclose, IOnnotify onnotify) {
+        pipelineCombination = new DefaultPipelineCombination(onnotify);
+        this.onopen = onopen;
+        this.onclose = onclose;
+    }
 
     public TcpConnection() {
-        pipelineCombination=new DefaultPipelineCombination();
+        this(null, null,null);
     }
 
     @Override
@@ -67,21 +77,39 @@ public class TcpConnection implements IConnection ,IReconnection, INetworkServic
         if ("$.connection".equals(serviceId)) {
             return this;
         }
-        if("$.channel".equals(serviceId)){
+        if ("$.channel".equals(serviceId)) {
             return channel;
         }
-        if("$.pipelineCombination".equals(serviceId)){
+        if ("$.pipelineCombination".equals(serviceId)) {
             return pipelineCombination;
         }
-        if ("$.reconnection".equals(serviceId)) {
-            return this;
-        }
+
         return null;
     }
 
     @Override
     public void forbiddenReconnect() {
-        this.forbiddenReconnect=true;
+        this.forbiddenReconnect = true;
+    }
+
+    @Override
+    public void addLogicNetwork(ILogicNetwork lnetwork) {
+        pipelineCombination.addLogicNetwork(lnetwork);
+    }
+
+    @Override
+    public void removeLogicNetwork(String network) {
+        pipelineCombination.removeLogicNetwork(network);
+    }
+
+    @Override
+    public ILogicNetwork localNetwork(String networkName) {
+        return pipelineCombination.localNetwork(networkName);
+    }
+
+    @Override
+    public Set<String> enumLocalNetwork() {
+        return pipelineCombination.enumLocalNetwork();
     }
 
     @Override
@@ -91,19 +119,25 @@ public class TcpConnection implements IConnection ,IReconnection, INetworkServic
 
     @Override
     public void onclose() {
-        System.out.println("~~~~~~~~~~~~~onclose");
+        if (onclose != null) {
+            onclose.onclose();
+        }
     }
 
     @Override
     public void onopen() {
-        System.out.println("~~~~~~~~~~~~~onopen");
+        if (onopen != null) {
+            onopen.onopen();
+        }
     }
 
     @Override
     public void reconnect() {
-        if(this.forbiddenReconnect){
+        if (this.forbiddenReconnect) {
             return;
         }
+        //重连则把缓冲的本地网络清掉
+        pipelineCombination.networkMap.clear();
         if (exepool != null) {
             if (!exepool.isShutdown() && !exepool.isTerminated()) {
                 exepool.shutdownGracefully();
@@ -116,6 +150,14 @@ public class TcpConnection implements IConnection ,IReconnection, INetworkServic
             props.clear();
         }
         connect(protocol, host, port, map);
+        if (onreconnection != null) {
+            onreconnection.onreconnect();
+        }
+    }
+
+    @Override
+    public void accept(IOnreconnection onreconnection) {
+        this.onreconnection = onreconnection;
     }
 
     @Override
@@ -205,23 +247,11 @@ public class TcpConnection implements IConnection ,IReconnection, INetworkServic
             ChannelPipeline pipeline = ch.pipeline();
             pipeline.addLast(new LengthFieldBasedFrameDecoder(81920, 0, 4, 0, 4));
             if (heartbeat > 0) {
-                pipeline.addLast(new IdleStateHandler(0, 0, heartbeat, TimeUnit.SECONDS));
+                pipeline.addLast(new IdleStateHandler(0, heartbeat, 0, TimeUnit.SECONDS));
             }
             pipeline.addLast(new TcpClientHandler(TcpConnection.this));
         }
 
     }
 
-
-    private class DefaultPipelineCombination implements IPipelineCombination {
-        @Override
-        public void combine(IPipeline pipeline) throws CombineException {
-
-        }
-
-        @Override
-        public void demolish(IPipeline pipeline) {
-
-        }
-    }
 }

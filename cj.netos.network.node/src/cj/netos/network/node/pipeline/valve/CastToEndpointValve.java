@@ -19,7 +19,7 @@ public class CastToEndpointValve implements IValve {
         IPrincipal principal = pipeline.principal();
         Channel channel = (Channel) pipeline.attachment();
         IEndpointer endpoint = endpointerContainer.openEndpoint(principal, channel);
-        endpoint.upstream(frame);
+        endpoint.upstream(principal, frame);
         pipeline.nextFlow(frame,this);
     }
 

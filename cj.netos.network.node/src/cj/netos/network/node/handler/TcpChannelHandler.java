@@ -61,6 +61,7 @@ public class TcpChannelHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        counter = 0;
         //如果心跳则退出，如果是空消息则退出，如果不是frame格式则退出
         //从container中找key，将消息放入reactor
         ByteBuf bb = (ByteBuf) msg;
@@ -78,7 +79,6 @@ public class TcpChannelHandler extends ChannelHandlerAdapter {
             return;
         }
         if (pack.isHeartbeat()) {
-            counter = 0;
             feedbackHeartbeat(ctx);
 //            CJSystem.logging().info(getClass(),"收到心跳包");
             return;
@@ -87,7 +87,6 @@ public class TcpChannelHandler extends ChannelHandlerAdapter {
         if (frame == null) {
             return;
         }
-        counter = 0;
         //以下路由到所请求的通道
         try {
             pipeline.input(frame);

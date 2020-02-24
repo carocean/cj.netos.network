@@ -1,5 +1,6 @@
 package cj.netos.network;
 
+import cj.netos.network.peer.ILogicNetwork;
 import cj.netos.network.peer.IPeer;
 import cj.ultimate.util.StringUtil;
 import org.apache.commons.cli.CommandLine;
@@ -17,7 +18,7 @@ public abstract class BaseMonitor implements IMonitor {
     protected abstract Map<String, Command> getCommands();
     protected abstract Scanner getScanner();
     @Override
-    public void moniter(IPeer peer) throws ParseException, IOException {
+    public void moniter(IPeer peer, ILogicNetwork network) throws ParseException, IOException {
         Scanner sc = getScanner();
         if(sc==null){
             sc=new Scanner(System.in);
@@ -55,9 +56,12 @@ public abstract class BaseMonitor implements IMonitor {
                 System.arraycopy(arr, 1, args, 0, arr.length - 1);
             }
             CommandLine the = new DefaultParser().parse(cmd.options(), args);
-            CmdLine cl = new CmdLine(cmdName, the, peer);
+            CmdLine cl = new CmdLine(cmdName, the, peer,network);
             try {
                 boolean isPrintPrefix = cmd.doCommand(cl);
+                if (checkExitOnAfterCommand(text)) {
+                    break;
+                }
                 if (isPrintPrefix) {
                     System.out.print(prefix);
                 }
@@ -67,6 +71,9 @@ public abstract class BaseMonitor implements IMonitor {
             }
         }
     }
+
+    protected abstract boolean checkExitOnAfterCommand(String text);
+
 
     protected abstract boolean isExit(String text);
 

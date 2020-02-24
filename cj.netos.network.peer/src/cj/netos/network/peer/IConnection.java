@@ -5,8 +5,9 @@ import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.NetworkFrame;
 
 import java.util.Map;
+import java.util.Set;
 
-public interface IConnection{
+public interface IConnection extends IReconnection{
     String getHost();
 
     String getProtocol();
@@ -26,6 +27,16 @@ public interface IConnection{
      * 禁止重连。原因或许是peer认证失败了
      */
     void forbiddenReconnect();
+    void onclose();
 
+    void onopen();
+
+    void addLogicNetwork(ILogicNetwork lnetwork);
+
+    void removeLogicNetwork(String network);
+
+    ILogicNetwork localNetwork(String networkName);
+
+    Set<String> enumLocalNetwork();
 
 }
