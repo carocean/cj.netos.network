@@ -7,8 +7,9 @@ import org.apache.jdbm.DB;
 import org.apache.jdbm.DBMaker;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DefaultNetwork implements INetwork {
 
@@ -43,6 +44,7 @@ public class DefaultNetwork implements INetwork {
         db
                 .close();
     }
+
 
     @Override
     public void addMember(IPrincipal principal, boolean joinToFrontend) {
@@ -102,12 +104,42 @@ public class DefaultNetwork implements INetwork {
     }
 
     @Override
-    public Set<String> listFrontendMembers() {
-        return this.frontendMembers.keySet();
+    public String[] listFrontendMembers() {
+        return this.frontendMembers.keySet().toArray(new String[0]);
     }
 
     @Override
-    public Set<String> listBackendMembers() {
-        return this.backendMembers.keySet();
+    public String[] listBackendMembers() {
+        return this.backendMembers.keySet().toArray(new String[0]);
+    }
+
+    @Override
+    public List<String> listFrontendMembersExcept(String key) {
+        if (frontendMembers.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> keys = new ArrayList<>();
+        for (String inkey : frontendMembers.keySet()) {
+            if (inkey.equals(key)) {
+                continue;
+            }
+            keys.add(inkey);
+        }
+        return keys;
+    }
+
+    @Override
+    public List<String> listBackendMembersExcept(String key) {
+        if (backendMembers.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> keys = new ArrayList<>();
+        for (String inkey : backendMembers.keySet()) {
+            if (inkey.equals(key)) {
+                continue;
+            }
+            keys.add(inkey);
+        }
+        return keys;
     }
 }

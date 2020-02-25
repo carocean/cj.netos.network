@@ -6,10 +6,7 @@ import cj.netos.network.node.server.TcpNetworkNodeServer;
 import cj.netos.network.node.server.WSNetworkNodeServer;
 import cj.studio.ecm.EcmException;
 import cj.studio.ecm.annotation.CjService;
-import org.apache.jdbm.DB;
-import org.apache.jdbm.DBMaker;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 
 @CjService(name = "networkNode", isExoteric = true)
@@ -41,7 +38,7 @@ public class NetworkNode implements INetworkNode {
         INetworkNodePluginLoader loader = new NetworkNodePluginLoader();
         networkNodePlugin = loader.scanAssemblyAndLoad(networkNodeConfig, site);
 
-        endportContainer = new DefaultEndportContainer(site);
+        endportContainer = new EndportContainer(site);
         endpointerContainer = new EndpointContainer(site);
 
 

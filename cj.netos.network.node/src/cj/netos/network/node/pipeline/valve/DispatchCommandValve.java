@@ -3,7 +3,7 @@ package cj.netos.network.node.pipeline.valve;
 import cj.netos.network.*;
 import cj.netos.network.node.IEndpointerContainer;
 import cj.netos.network.node.INetworkCommand;
-import cj.netos.network.node.pipeline.command.*;
+import cj.netos.network.node.command.*;
 import cj.studio.ecm.net.CircuitException;
 import io.netty.channel.Channel;
 

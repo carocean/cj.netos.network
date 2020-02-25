@@ -16,4 +16,12 @@ public class EndportInfo{
     public static EndportInfo load(byte[] bytes) {
         return new Gson().fromJson(new String(bytes), EndportInfo.class);
     }
+
+    public String getPrincipalKey() {
+        return principalKey;
+    }
+
+    public ListenMode getListenMode() {
+        return listenMode;
+    }
 }

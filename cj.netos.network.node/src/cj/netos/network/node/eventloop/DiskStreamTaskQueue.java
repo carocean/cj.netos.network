@@ -31,7 +31,7 @@ public class DiskStreamTaskQueue implements ITaskQueue {
     }
 
     @Override
-    public Task selectOne(long longTime, TimeUnit timeUnit) {
+    public EventTask selectOne(long longTime, TimeUnit timeUnit) {
         byte[] b = null;
         try {
             b = bigQueue.dequeue();
@@ -49,12 +49,12 @@ public class DiskStreamTaskQueue implements ITaskQueue {
                 lock.unlock();
             }
         }
-        Task e = new Gson().fromJson(new String(b), Task.class);
+        EventTask e = new Gson().fromJson(new String(b), EventTask.class);
         return e;
     }
 
     @Override
-    public void append(Task e) {
+    public void append(EventTask e) {
         try {
             bigQueue.enqueue(new Gson().toJson(e).getBytes());
         } catch (IOException ex) {

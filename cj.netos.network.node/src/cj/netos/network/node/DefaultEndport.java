@@ -24,6 +24,10 @@ public class DefaultEndport implements IEndport {
         }
         this.dir = dir;
     }
+    @Override
+    public EndportInfo getInfo() {
+        return info;
+    }
 
     @Override
     public IStreamSink openUpstream() throws CircuitException {

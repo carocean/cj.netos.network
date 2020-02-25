@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class DefaultPump implements IPump,INetworkServiceProvider {
+public class DefaultPump implements IPump, INetworkServiceProvider {
 
     ExecutorService upstreamexe;
     ExecutorService downstreamexe;
@@ -17,6 +17,7 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
     IKeySelector upstreamSelector;
     ITaskQueue downstreamTaskQueue;
     IKeySelector downstreamSelector;
+
     @Override
     public void start(INetworkServiceProvider site) {
         INetworkNodeConfig config = (INetworkNodeConfig) site.getService("$.network.config");
@@ -25,10 +26,12 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
 
         INetworkContainer networkContainer = (INetworkContainer) site.getService("$.network.networkContainer");
         IEndportContainer endportContainer = (IEndportContainer) site.getService("$.network.endportContainer");
+        IEndpointerContainer endpointerContainer = (IEndpointerContainer) site.getService("$.network.endpointerContainer");
 
         buildUpstreamEventloop(info, config, networkContainer, endportContainer);
-        buildDownstreamEventloop(info, config, networkContainer, endportContainer);
+        buildDownstreamEventloop(info, config, endpointerContainer, endportContainer);
     }
+
     @Override
     public void close() {
         upstreamexe.shutdownNow();
@@ -39,6 +42,12 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
 
     @Override
     public Object getService(String name) {
+        if ("$.pump.downstream.queue".equals(name)) {
+            return downstreamTaskQueue;
+        }
+        if ("$.pump.upstream.queue".equals(name)) {
+            return upstreamTaskQueue;
+        }
         return null;
     }
 
@@ -50,7 +59,7 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
         }
 
         upstreamTaskQueue = new DiskStreamTaskQueue();
-        upstreamTaskQueue.init(queueDir,"upstream");
+        upstreamTaskQueue.init(queueDir, "upstream");
         upstreamexe = Executors.newFixedThreadPool(info.upstreamWorkThreadCount());
 
         ILineCombination combination = new DefaultUpstreamLineCombination(networkContainer, endportContainer);
@@ -61,17 +70,17 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
         }
     }
 
-    private void buildDownstreamEventloop(PumpInfo info, INetworkNodeConfig config, INetworkContainer networkContainer, IEndportContainer endportContainer) {
+    private void buildDownstreamEventloop(PumpInfo info, INetworkNodeConfig config, IEndpointerContainer endpointerContainer, IEndportContainer endportContainer) {
         String queueDir = String.format("%s%sstore%spump%s", config.home(), File.separator, File.separator, File.separator);
         File file = new File(queueDir);
         if (!file.exists()) {
             file.mkdirs();
         }
         downstreamTaskQueue = new DiskStreamTaskQueue();
-        downstreamTaskQueue.init(queueDir,"downstream");
+        downstreamTaskQueue.init(queueDir, "downstream");
         downstreamexe = Executors.newFixedThreadPool(info.downstreamWorkThreadCount());
 
-        ILineCombination combination = new DefaultDownstreamLineCombination(networkContainer, endportContainer);
+        ILineCombination combination = new DefaultDownstreamLineCombination(endpointerContainer, endportContainer);
         downstreamSelector = new DefaultKeySelector(this, combination);
         for (int i = 0; i < info.downstreamWorkThreadCount(); i++) {
             IEventLooper looper = new EventLooper(downstreamSelector, downstreamTaskQueue, info.downstreamQueueWaitTime());
@@ -80,12 +89,12 @@ public class DefaultPump implements IPump,INetworkServiceProvider {
     }
 
     @Override
-    public synchronized void arriveUpstream(Task task) {
+    public synchronized void arriveUpstream(EventTask task) {
         upstreamTaskQueue.append(task);
     }
 
     @Override
-    public synchronized void arriveDownstream(Task task) {
+    public synchronized void arriveDownstream(EventTask task) {
         downstreamTaskQueue.append(task);
     }
 }

@@ -1,13 +1,9 @@
 package cj.netos.network.node.pump;
 
-import cj.netos.network.BackendCastmode;
-import cj.netos.network.NetworkFrame;
 import cj.netos.network.node.*;
 import cj.netos.network.node.eventloop.ILine;
 import cj.netos.network.node.eventloop.ILineCombination;
-import cj.netos.network.node.eventloop.IReceiver;
-import cj.netos.network.node.eventloop.Task;
-import cj.studio.ecm.net.CircuitException;
+import cj.netos.network.node.eventloop.ITaskQueue;
 
 //功能：从endport的上行队列中拉取消息分发给其它endport
 public class DefaultUpstreamLineCombination implements ILineCombination {
@@ -21,7 +17,9 @@ public class DefaultUpstreamLineCombination implements ILineCombination {
 
     @Override
     public void combine(ILine line) {
-        line.accept(new CastReceiver(networkContainer,endportContainer));
+        ITaskQueue queue = (ITaskQueue) line.site().getService("$.pump.downstream.queue");
+        line.accept(new CastFrameToEndport(networkContainer, endportContainer))
+                .accept(new PutDownstreamEventTask(queue));
     }
 
 

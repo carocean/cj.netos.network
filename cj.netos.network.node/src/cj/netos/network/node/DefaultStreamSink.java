@@ -36,6 +36,9 @@ public class DefaultStreamSink implements IStreamSink {
     public synchronized NetworkFrame pullFirst() throws CircuitException {
         try {
             byte[] b = queue.peek();
+            if (b == null) {
+                return null;
+            }
             return new NetworkFrame(b);
         } catch (IOException e) {
             throw new CircuitException("404", e);

@@ -82,15 +82,15 @@ public class DefaultPipeline implements IPipeline {
     }
 
     @Override
-    public void nextError(NetworkFrame e, Throwable error, IValve formthis) throws CircuitException {
+    public void nextError(NetworkFrame e, Throwable error, IValve current) throws CircuitException {
         if (head == null) {
             return;
         }
-        if (formthis == null) {
+        if (current == null) {
             head.entry.nextError(e, error, this);
             return;
         }
-        LinkEntry linkEntry = lookforHead(formthis);
+        LinkEntry linkEntry = lookforHead(current);
         if (linkEntry == null || linkEntry.next == null)
             return;
         linkEntry.next.entry.nextError(e, error, this);
@@ -111,14 +111,14 @@ public class DefaultPipeline implements IPipeline {
     }
 
     @Override
-    public void nextFlow(NetworkFrame e, IValve formthis) throws CircuitException {
+    public void nextFlow(NetworkFrame e, IValve current) throws CircuitException {
         if (head == null)
             return;
-        if (formthis == null) {
+        if (current == null) {
             head.entry.flow(e, this);
             return;
         }
-        LinkEntry linkEntry = lookforHead(formthis);
+        LinkEntry linkEntry = lookforHead(current);
         if (linkEntry == null || linkEntry.next == null)
             return;
         linkEntry.next.entry.flow(e, this);

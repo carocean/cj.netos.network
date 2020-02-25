@@ -1,5 +1,6 @@
 package cj.netos.network.node.eventloop;
 
+import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.node.Direction;
 import cj.studio.ecm.net.CircuitException;
 
@@ -8,10 +9,13 @@ public interface ILine {
 
     Direction direction();
 
-    void accept(IReceiver receiver);
+    ILine accept(IReceiver receiver);
 
-    void input(Task task) throws CircuitException;
+    void input(EventTask task) throws CircuitException;
 
-    void error(Task task, Throwable e);
+    void nextInput(EventTask task, IReceiver current) throws CircuitException;
 
+    void error(EventTask task, Throwable e);
+
+    INetworkServiceProvider site();
 }

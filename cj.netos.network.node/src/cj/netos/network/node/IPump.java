@@ -1,7 +1,7 @@
 package cj.netos.network.node;
 
 import cj.netos.network.INetworkServiceProvider;
-import cj.netos.network.node.eventloop.Task;
+import cj.netos.network.node.eventloop.EventTask;
 
 /**
  * 抽水泵
@@ -12,7 +12,7 @@ public interface IPump {
     void close();
 
 
-    void arriveUpstream(Task task);
+    void arriveUpstream(EventTask task);
 
-    void arriveDownstream(Task task);
+    void arriveDownstream(EventTask task);
 }

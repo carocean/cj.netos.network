@@ -5,7 +5,7 @@ import cj.netos.network.node.Direction;
 import cj.netos.network.node.IEndport;
 import cj.netos.network.node.IEndportContainer;
 import cj.netos.network.node.IPump;
-import cj.netos.network.node.eventloop.Task;
+import cj.netos.network.node.eventloop.EventTask;
 import cj.studio.ecm.net.CircuitException;
 
 
@@ -23,7 +23,7 @@ public class UpstreamEndportValve implements IValve {
         IPrincipal principal = pipeline.principal();
         IEndport endport = endportContainer.openport(principal);
         endport.openUpstream().write( frame).close();
-        Task task = new Task(Direction.upstream, principal.key(), frame.rootName());
+        EventTask task = new EventTask(Direction.upstream, principal.key(), frame.rootName());
         pump.arriveUpstream(task);
         pipeline.nextFlow(frame, this);
     }

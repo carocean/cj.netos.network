@@ -26,9 +26,9 @@ public interface IPipeline extends IDisposable {
 
     void input(NetworkFrame frame) throws CircuitException;
 
-    void nextFlow(NetworkFrame frame, IValve formthis) throws CircuitException;
+    void nextFlow(NetworkFrame frame, IValve current) throws CircuitException;
 
-    void nextError(NetworkFrame frame, Throwable error, IValve formthis) throws CircuitException;
+    void nextError(NetworkFrame frame, Throwable error, IValve current) throws CircuitException;
 
     void remove(IValve valve);
 

@@ -16,15 +16,15 @@ public class EventLooper implements IEventLooper {
     }
 
     @Override
-    public Task call() throws Exception {
+    public EventTask call() throws Exception {
         while (!Thread.interrupted()) {
-            Task task = queue.selectOne(waitTIme, TimeUnit.MILLISECONDS);
+            EventTask task = queue.selectOne(waitTIme, TimeUnit.MILLISECONDS);
             System.out.println("发现-------"+task);
             IKey key = null;
             try{
-                key = selector.select(task.getEndpoint(),task.direction);
+                key = selector.select(task.getEndpointKey(),task.direction);
             }catch (Throwable e){
-                selector.removeKey(task.getEndpoint());
+                selector.removeKey(task.getEndpointKey());
                 CJSystem.logging().warn(getClass(),e.getMessage());
                 continue;
             }
@@ -42,7 +42,7 @@ public class EventLooper implements IEventLooper {
                     try {
                         key.line().error(task, e);
                     } catch (Throwable e2) {
-                        selector.removeKey(task.getEndpoint());
+                        selector.removeKey(task.getEndpointKey());
                         CJSystem.logging().error(getClass(), e2);
                     }
                 }
