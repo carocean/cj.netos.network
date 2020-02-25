@@ -1,5 +1,7 @@
 package cj.netos.network;
 
+import cj.ultimate.gson2.com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +22,19 @@ public class DefaultPrincipal implements IPrincipal {
             this.roles = new ArrayList<>();
         }
     }
-
+    @Override
+    public byte[] toBytes(){
+        Map<String, Object> map = new HashMap<>();
+        map.put("principal", principal);
+        map.put("peer", peer);
+        map.put("roles", roles);
+        return new Gson().toJson(map).getBytes();
+    }
+    public static IPrincipal load(byte[] b){
+        DefaultPrincipal principal = new Gson().fromJson(new String(b), DefaultPrincipal.class);
+        principal.properties = new HashMap<>();
+        return principal;
+    }
     @Override
     public String key() {
         return String.format("%s/%s",principal,peer);

@@ -5,19 +5,16 @@ import cj.studio.ecm.net.CircuitException;
 import io.netty.channel.Channel;
 
 public interface IEndpointerContainer {
-    void onChannelInactive(Channel channel) throws CircuitException;
-
-    IEndpointer openEndpoint(IPrincipal principal, Channel channel) throws CircuitException;
 
 
-    void onJoinNetwork(IPrincipal principal, String network);
+    IEndpointer createEndpointer(IPrincipal principal, Channel channel) throws CircuitException;
 
-    void onLeaveNetwork(IPrincipal principal, String network);
+    IEndpointer endpointer(String endpointerKey);
 
-    IEndpointer endpoint(String key);
+    boolean hasEndpointer(String endpointerKey);
 
-    ISinkPull createSinkPuller(String endpoint, String network);
+    void offline(Channel channel) throws CircuitException;
 
-    IEndpointer availableEndpoint();
+    void online(IPrincipal principal);
 
 }

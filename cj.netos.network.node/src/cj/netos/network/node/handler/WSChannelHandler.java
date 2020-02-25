@@ -122,7 +122,7 @@ public class WSChannelHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         counter = 0;
-        endpointerContainer.onChannelInactive(ctx.channel());
+        endpointerContainer.offline(ctx.channel());
         combination.demolish(pipeline);
         pipeline.attachment(null);
         pipeline .dispose();

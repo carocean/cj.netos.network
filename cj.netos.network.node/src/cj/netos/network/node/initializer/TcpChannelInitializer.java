@@ -1,8 +1,8 @@
 
 package cj.netos.network.node.initializer;
 
-import cj.netos.network.node.handler.TcpChannelHandler;
 import cj.netos.network.INetworkServiceProvider;
+import cj.netos.network.node.handler.TcpChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;

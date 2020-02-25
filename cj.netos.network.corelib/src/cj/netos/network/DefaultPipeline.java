@@ -1,6 +1,5 @@
 package cj.netos.network;
 
-import cj.netos.network.*;
 import cj.studio.ecm.net.CircuitException;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;

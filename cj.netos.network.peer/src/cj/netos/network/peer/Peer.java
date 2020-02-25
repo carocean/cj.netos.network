@@ -2,6 +2,7 @@ package cj.netos.network.peer;
 
 import cj.netos.network.BackendCastmode;
 import cj.netos.network.FrontendCastmode;
+import cj.netos.network.ListenMode;
 import cj.netos.network.NetworkFrame;
 import cj.studio.ecm.EcmException;
 import cj.ultimate.util.StringUtil;
@@ -121,10 +122,11 @@ public class Peer implements IPeer {
     }
 
     @Override
-    public ILogicNetwork listen(String networkName, boolean isJoinToFrontend) {
+    public ILogicNetwork listen(String networkName, boolean isJoinToFrontend, ListenMode mode) {
         _checkAuthed();
         NetworkFrame frame = new NetworkFrame(String.format("listenNetwork /%s network/1.0", networkName));
         frame.parameter("isJoinToFrontend", isJoinToFrontend + "");
+        frame.parameter("listenMode", mode.name());
         ILogicNetwork lnetwork = new DefaultLogicNetwork(networkName, connection);
         connection.addLogicNetwork(lnetwork);
         connection.send(frame);

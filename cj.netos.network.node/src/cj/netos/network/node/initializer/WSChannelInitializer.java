@@ -1,8 +1,8 @@
 
 package cj.netos.network.node.initializer;
 
-import cj.netos.network.node.handler.WSChannelHandler;
 import cj.netos.network.INetworkServiceProvider;
+import cj.netos.network.node.handler.WSChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;

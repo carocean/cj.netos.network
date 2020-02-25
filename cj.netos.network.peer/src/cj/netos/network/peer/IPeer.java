@@ -2,6 +2,7 @@ package cj.netos.network.peer;
 
 import cj.netos.network.BackendCastmode;
 import cj.netos.network.FrontendCastmode;
+import cj.netos.network.ListenMode;
 
 import java.util.Set;
 
@@ -11,7 +12,7 @@ public interface IPeer {
 
     void authByAccessToken(String accessToken);
 
-    ILogicNetwork listen(String networkName,boolean isJoinToFrontend);
+    ILogicNetwork listen(String networkName, boolean isJoinToFrontend, ListenMode mode);
 
     ILogicNetwork localNetwork(String networkName);
 

@@ -12,10 +12,6 @@ public interface IPump {
     void close();
 
 
-    void removeUpstreamKey(String key);
-
-    void removeDownstreamKey(String key);
-
     void arriveUpstream(Task task);
 
     void arriveDownstream(Task task);

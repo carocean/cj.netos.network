@@ -13,14 +13,6 @@ public class Task {
         this.network = network;
     }
 
-    public Task(Direction direction, String person, String peer, String network) {
-        this.direction = direction;
-        this.endpoint = String.format("%s/%s", person, peer);
-        this.network = network;
-    }
-    public String getKey(){
-        return String.format("%s/%s", endpoint, network);
-    }
     public Direction getDirection() {
         return direction;
     }

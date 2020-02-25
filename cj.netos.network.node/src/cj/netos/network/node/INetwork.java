@@ -1,22 +1,14 @@
 package cj.netos.network.node;
 
-import cj.netos.network.*;
-import cj.studio.ecm.net.CircuitException;
+import cj.netos.network.BackendCastmode;
+import cj.netos.network.FrontendCastmode;
+import cj.netos.network.IPrincipal;
+import cj.ultimate.IClosable;
 
 import java.util.Set;
 
-public interface INetwork {
-
-    void cast(Sender sender,NetworkFrame frame) throws CircuitException;
-
-    INetworkSink getFrontendSink(String endpointKey);
-
-    Set<String> enumFrontendSinkKey();
-
-    INetworkSink getBackendSink(String endpointKey);
-
-    Set<String> enumBackendSinkKey();
-
+//缓冲LRU前置成员和后置成员
+public interface INetwork extends IClosable {
     String getName();
 
     String getTitle();
@@ -25,16 +17,21 @@ public interface INetwork {
 
     BackendCastmode getBackendCastmode();
 
-    INetworkSink getFrontendSink(IPrincipal principal);
 
+    void addMember(IPrincipal principal, boolean joinToFrontend);
 
-    INetworkSink getBackendSink(IPrincipal principal);
+    void removeMember(IPrincipal principal);
 
+    int frontendMemberCount();
 
-    void join(IPrincipal principal, boolean joinToFrontend);
+    int backendMemberCount();
 
-    void leave(IPrincipal principal);
+    Set<String> listFrontendMembers();
 
-    void close();
+    Set<String> listBackendMembers();
+
+    boolean hasMemberInFrontend(String key);
+
+    boolean hasMemberInBackend(String key);
 
 }

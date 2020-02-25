@@ -9,7 +9,7 @@ public interface ILogicNetwork {
 
     void leave() throws CircuitException;
 
-    void ls() throws CircuitException;
+    void ls(String memberIn) throws CircuitException;
 
     void send(NetworkFrame frame) throws CircuitException;
 

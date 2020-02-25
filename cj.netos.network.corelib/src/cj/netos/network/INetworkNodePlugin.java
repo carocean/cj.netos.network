@@ -1,8 +1,5 @@
 package cj.netos.network;
 
-import cj.netos.network.INetworkServiceProvider;
-import cj.netos.network.IPrincipal;
-import cj.netos.network.IValve;
 import cj.studio.ecm.net.CircuitException;
 
 public interface INetworkNodePlugin  {

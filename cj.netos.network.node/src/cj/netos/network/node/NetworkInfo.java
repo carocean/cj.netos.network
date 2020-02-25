@@ -2,7 +2,9 @@ package cj.netos.network.node;
 
 import cj.netos.network.BackendCastmode;
 import cj.netos.network.FrontendCastmode;
+import cj.ultimate.gson2.com.google.gson.Gson;
 
+import java.io.Serializable;
 import java.util.Map;
 
 public class NetworkInfo {
@@ -10,6 +12,14 @@ public class NetworkInfo {
     String title;
     FrontendCastmode frontendCastMode;
     BackendCastmode backendCastmode;
+
+    public byte[] toBytes() {
+        return new Gson().toJson(this).getBytes();
+    }
+
+    public static NetworkInfo load(byte[] bytes) {
+        return new Gson().fromJson(new String(bytes), NetworkInfo.class);
+    }
 
     public void parse(Map<String, Object> item) {
         for (Map.Entry<String, Object> en : item.entrySet()) {

@@ -23,8 +23,9 @@ public class DefaultLogicNetwork implements ILogicNetwork {
     }
 
     @Override
-    public void ls() throws CircuitException {
+    public void ls(String memberIn) throws CircuitException {
         NetworkFrame frame = new NetworkFrame(String.format("viewNetwork /%s network/1.0", network));
+        frame.parameter("viewMember", memberIn);
         connection.send(frame);
     }
 

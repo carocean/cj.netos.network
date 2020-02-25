@@ -1,32 +1,30 @@
 package cj.netos.network.node.eventloop;
 
-import cj.netos.network.node.stream.DiskStream;
 import cj.studio.ecm.EcmException;
 import cj.ultimate.gson2.com.google.gson.Gson;
+import com.leansoft.bigqueue.BigQueueImpl;
+import com.leansoft.bigqueue.IBigQueue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class DiskStreamTaskQueue implements ITaskQueue {
-    DiskStream diskStream;
-    String dbHome;
-    long dataFileLength;
+    IBigQueue bigQueue;
     ReentrantLock lock;
     Condition readToWPointerCondition;
-
-    public DiskStreamTaskQueue(String dbHome) {
-        this.dbHome = dbHome;
-    }
-
     @Override
-    public void init(long capacity) {
+    public void init(String queueDir, String queueName) {
         lock = new ReentrantLock();
         readToWPointerCondition = lock.newCondition();
-        this.dataFileLength = capacity;
+        File file = new File(queueDir);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         try {
-            diskStream = new DiskStream(dbHome, dataFileLength);
+            bigQueue = new BigQueueImpl(queueDir, queueName);
         } catch (IOException e) {
             throw new EcmException(e);
         }
@@ -36,7 +34,7 @@ public class DiskStreamTaskQueue implements ITaskQueue {
     public Task selectOne(long longTime, TimeUnit timeUnit) {
         byte[] b = null;
         try {
-            b = diskStream.read();
+            b = bigQueue.dequeue();
         } catch (IOException e) {
             throw new EcmException(e);
         }
@@ -53,13 +51,12 @@ public class DiskStreamTaskQueue implements ITaskQueue {
         }
         Task e = new Gson().fromJson(new String(b), Task.class);
         return e;
-
     }
 
     @Override
     public void append(Task e) {
         try {
-            diskStream.write(new Gson().toJson(e).getBytes());
+            bigQueue.enqueue(new Gson().toJson(e).getBytes());
         } catch (IOException ex) {
             throw new EcmException(ex);
         }
@@ -71,21 +68,22 @@ public class DiskStreamTaskQueue implements ITaskQueue {
         }
     }
 
-    @Override
-    public void dispose() {
-        try {
-            this.diskStream.close();
-        } catch (IOException e) {
-            throw new EcmException(e);
-        }
-    }
 
     @Override
     public void close() {
         try {
-            diskStream.close();
+            bigQueue.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            bigQueue.removeAll();
+        } catch (IOException e) {
+            throw new EcmException(e);
         }
     }
 }

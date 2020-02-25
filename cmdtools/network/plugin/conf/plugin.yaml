@@ -8,4 +8,4 @@ ports:
 okhttp:
   readTimeout: 5000
   writeTimeout: 5000
-  connectTimeout: 5000
+  connectTimeout: 15000

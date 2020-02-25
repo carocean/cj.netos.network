@@ -17,11 +17,11 @@ public class NetworkNode implements INetworkNode {
     INetworkNodeServer nodeServer;//一个节点有且仅有一个服务器
     INetworkNodeConfig networkNodeConfig;//节点配置
     IEndpointerContainer endpointerContainer;//终节点容器
+    IEndportContainer endportContainer;//终结口容器
     INetworkContainer networkContainer;//网络容器
     IPump pump;//抽水泵，也叫磁头，从终节点的接收队列和网络的终接点接收队列中抽取消息
     INetworkNodePlugin networkNodePlugin;
     INetworkServiceProvider site;
-    DB db;
 
     @Override
     public void entrypoint(String home) throws FileNotFoundException {
@@ -30,34 +30,24 @@ public class NetworkNode implements INetworkNode {
         networkNodeConfig = new NetworkNodeConfig();
         networkNodeConfig.load(home);
 
-        db = initDb(home);
 
         nodeServer = createNetworkNodeServer(networkNodeConfig.getServerInfo());
 
         pump = new DefaultPump();
 
         networkContainer = new NetworkContainer();
-        networkContainer.load(site,networkNodeConfig.getNetworkConfig());
+        networkContainer.load(site, networkNodeConfig.getNetworkConfig(),home);
 
         INetworkNodePluginLoader loader = new NetworkNodePluginLoader();
         networkNodePlugin = loader.scanAssemblyAndLoad(networkNodeConfig, site);
 
+        endportContainer = new DefaultEndportContainer(site);
         endpointerContainer = new EndpointContainer(site);
 
 
         pump.start(site);
 
         nodeServer.start();
-    }
-
-    private DB initDb(String home) {
-        String storeDir = String.format("%s%scache", home, File.separator);
-        File f = new File(storeDir);
-        if (!f.exists()) {
-            f.mkdirs();
-        }
-        storeDir=String.format("%s%sdb_",storeDir,File.separator);
-        return DBMaker.openFile(storeDir).closeOnExit().make();
     }
 
 
@@ -89,15 +79,16 @@ public class NetworkNode implements INetworkNode {
             if ("$.network.endpointerContainer".equals(serviceId)) {
                 return endpointerContainer;
             }
+            if ("$.network.endportContainer".equals(serviceId)) {
+                return endportContainer;
+            }
             if ("$.network.server".equals(serviceId)) {
                 return nodeServer;
             }
             if ("$.network.plugin".equals(serviceId)) {
                 return networkNodePlugin;
             }
-            if ("$.network.db".equals(serviceId)) {
-                return db;
-            }
+            
             if ("$.network.config".equals(serviceId)) {
                 return networkNodeConfig;
             }

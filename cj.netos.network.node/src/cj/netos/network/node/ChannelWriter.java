@@ -9,11 +9,15 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import io.netty.util.AttributeKey;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class ChannelWriter {
     public void write(Channel channel, NetworkFrame frame) {
+        if (!frame.containsHead("status")) {
+            frame.head("status", "200");
+        }
+        if (!frame.containsHead("message")) {
+            frame.head("message", "OK");
+        }
         AttributeKey<String> key = AttributeKey.valueOf("Net-Protocol");
         String protocol = channel.attr(key).get();
         switch (protocol) {

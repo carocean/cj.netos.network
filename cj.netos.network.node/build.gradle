@@ -21,12 +21,14 @@ repositories {
 dependencies {
     compile group: 'org.apache.jdbm', name: 'jdbm', version: '3.0-alpha5'
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.25'
+    // https://mvnrepository.com/artifact/com.baidu/leansoft-bigqueue
+    compile group: 'com.baidu', name: 'leansoft-bigqueue', version: '0.7.3'
     compile group: 'cj.studio.gateway2', name: 'cj.studio.ecm.net', version: ref_cj_studio_ecm_net_version
     compile project (':cj.netos.network.corelib')
 }
 task copyReferences(type: Copy) {
     from configurations.compileClasspath.files {
-        include 'snakeyaml-*.jar','cj.studio.ecm.net-*.jar','jdbm-*.jar'
+        include 'snakeyaml-*.jar','cj.studio.ecm.net-*.jar','jdbm-*.jar','leansoft-bigqueue-*.jar','guava-*.jar'
     }
     into 'src/cj/references'
 }
