@@ -19,7 +19,7 @@ public class EventLooper implements IEventLooper {
     public EventTask call() throws Exception {
         while (!Thread.interrupted()) {
             EventTask task = queue.selectOne(waitTIme, TimeUnit.MILLISECONDS);
-            System.out.println("发现-------"+task);
+//            System.out.println("发现-------"+task);
             IKey key = null;
             try{
                 key = selector.select(task.getEndpointKey(),task.direction);
@@ -29,10 +29,10 @@ public class EventLooper implements IEventLooper {
                 continue;
             }
             synchronized (key.key()) {// 让同一个管道的事件按序执行
-                System.out.println("同步-------");
+//                System.out.println("同步-------");
                 try {
                     key.line().input(task);
-                    System.out.println("完成-------"+task);
+//                    System.out.println("完成-------"+task);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     CircuitException ce = CircuitException.search(e);

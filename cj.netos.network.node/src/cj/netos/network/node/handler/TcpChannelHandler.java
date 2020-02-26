@@ -108,10 +108,10 @@ public class TcpChannelHandler extends ChannelHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
         ctx.channel().attr(AttributeKey.valueOf("Net-Protocol")).set("tcp");
         pipeline.attachment(ctx.channel());
         combination.combine(pipeline);
-        super.channelActive(ctx);
     }
 
     @Override

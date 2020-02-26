@@ -23,11 +23,6 @@ public class NetworkContainer implements INetworkContainer {
     }
 
     @Override
-    public String getEventNetwork() {
-        return config.getEventNetwork();
-    }
-
-    @Override
     public void close() {
         db.close();
     }
@@ -107,6 +102,7 @@ public class NetworkContainer implements INetworkContainer {
             infoMap.put(entry.getKey(), entry.getValue().toBytes());
         }
         db.commit();
+
     }
 
     @Override

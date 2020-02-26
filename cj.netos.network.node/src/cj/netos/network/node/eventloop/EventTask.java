@@ -13,6 +13,14 @@ public class EventTask {
         this.network = network;
     }
 
+    public String getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(String network) {
+        this.network = network;
+    }
+
     public Direction getDirection() {
         return direction;
     }
@@ -29,17 +37,9 @@ public class EventTask {
         this.endpoint = endpoint;
     }
 
-    public String getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(String network) {
-        this.network = network;
-    }
-
     @Override
     public String toString() {
-        return "Task{" +
+        return "EventTask{" +
                 "direction=" + direction +
                 ", endpoint='" + endpoint + '\'' +
                 ", network='" + network + '\'' +

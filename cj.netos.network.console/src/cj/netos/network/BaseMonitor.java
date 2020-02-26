@@ -16,16 +16,18 @@ import java.util.Set;
 public abstract class BaseMonitor implements IMonitor {
 
     protected abstract Map<String, Command> getCommands();
+
     protected abstract Scanner getScanner();
+
     @Override
     public void moniter(IPeer peer, ILogicNetwork network) throws ParseException, IOException {
         Scanner sc = getScanner();
-        if(sc==null){
-            sc=new Scanner(System.in);
+        if (sc == null) {
+            sc = new Scanner(System.in);
         }
         String prefix = getPrefix();
-        if(StringUtil.isEmpty(prefix)){
-            prefix=">";
+        if (StringUtil.isEmpty(prefix)) {
+            prefix = ">";
         }
         System.out.print(prefix);
         Map<String, Command> commands = getCommands();
@@ -55,9 +57,10 @@ public abstract class BaseMonitor implements IMonitor {
             if (arr.length > 1) {
                 System.arraycopy(arr, 1, args, 0, arr.length - 1);
             }
-            CommandLine the = new DefaultParser().parse(cmd.options(), args);
-            CmdLine cl = new CmdLine(cmdName, the, peer,network);
             try {
+                CommandLine the = new DefaultParser().parse(cmd.options(), args);
+                CmdLine cl = new CmdLine(cmdName, the, peer, network);
+
                 boolean isPrintPrefix = cmd.doCommand(cl);
                 if (checkExitOnAfterCommand(text)) {
                     break;

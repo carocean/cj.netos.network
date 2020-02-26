@@ -3,10 +3,7 @@ package cj.netos.network.node.command;
 import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
-import cj.netos.network.node.ChannelWriter;
-import cj.netos.network.node.INetworkCommand;
-import cj.netos.network.node.INetworkNodeConfig;
-import cj.netos.network.node.ServerInfo;
+import cj.netos.network.node.*;
 import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.gson2.com.google.gson.Gson;
 import io.netty.buffer.ByteBuf;
@@ -28,8 +25,7 @@ public class ViewServerCommand implements INetworkCommand {
         map.put("host", String.format("%s://%s:%s", info.getProtocol(), info.getHost(), info.getPort()));
         map.put("openports", info.getOpenports());
         bb.writeBytes(new Gson().toJson(map).getBytes());
-        ByteBuf copy = bb.copy();
-        NetworkFrame back = new NetworkFrame(String.format("viewServer /system/notify/ network/1.0"), bb);
+        NetworkFrame back = new NetworkFrame(String.format("viewServer / network/1.0"), bb);
         if (principal != null) {
             back.head("sender-person", principal.principal());
             back.head("sender-peer", principal.peer());
@@ -45,5 +41,6 @@ public class ViewServerCommand implements INetworkCommand {
     public ViewServerCommand(INetworkServiceProvider site) {
         config = (INetworkNodeConfig) site.getService("$.network.config");
         channelWriter = new ChannelWriter();
+        NetworkNodeConfig config = (NetworkNodeConfig) site.getService("$.network.config");
     }
 }

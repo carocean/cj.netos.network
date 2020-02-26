@@ -1,12 +1,10 @@
 package cj.netos.network.node;
 
 import cj.netos.network.INetworkServiceProvider;
+import cj.netos.network.ListenMode;
 import cj.studio.ecm.net.CircuitException;
-import com.leansoft.bigqueue.BigQueueImpl;
-import com.leansoft.bigqueue.IBigQueue;
 
 import java.io.File;
-import java.io.IOException;
 
 public class DefaultEndport implements IEndport {
     EndportInfo info;
@@ -24,30 +22,30 @@ public class DefaultEndport implements IEndport {
         }
         this.dir = dir;
     }
+
     @Override
     public EndportInfo getInfo() {
         return info;
     }
 
     @Override
-    public IStreamSink openUpstream() throws CircuitException {
-        IBigQueue queue = null;
-        try {
-            queue = new BigQueueImpl(dir, "upstream");
-        } catch (IOException e) {
-            throw new CircuitException("404", e);
-        }
-        return new DefaultStreamSink(queue);
+    public IStreamSink openUpstream(String network) throws CircuitException {
+        String path = String.format("%supstream%s", dir, File.separator);
+        return new DefaultStreamSink(path, network);
     }
 
     @Override
-    public IStreamSink openDownstream() throws CircuitException {
-        IBigQueue queue = null;
-        try {
-            queue = new BigQueueImpl(dir, "downstream");
-        } catch (IOException e) {
-            throw new CircuitException("404", e);
+    public IStreamSink openDownstream(String network) throws CircuitException {
+        String path = String.format("%sdownstream%s", dir, File.separator);
+        return new DefaultStreamSink(path, network);
+    }
+
+    @Override
+    public boolean isListenMode(String network, ListenMode listenMode) {
+        if (!info.containsNetworkListenmode(network)) {
+            return false;
         }
-        return new DefaultStreamSink(queue);
+        ListenMode mode = this.info.getNetworkListenmode(network);
+        return mode == listenMode;
     }
 }

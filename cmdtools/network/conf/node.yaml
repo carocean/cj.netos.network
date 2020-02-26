@@ -33,22 +33,10 @@ pump:
 networkContainer:
   #是否按请求地址上下文自动创建网络
   isAutoCreate: false
-  #事件网络，用于订阅一个网络节点的事件通知
-  eventNetwork: event-network
   netowrks:
-    # 网络中前置frontend的分发模式castmode: unicast|multicast|selectcast. selectcast分发模式检查请求头中是否含有To-Peer或者To-User，将请求分发到该目标。如果同时均有则均发送
-    # 网络中后置backend的分发模式castmode：unicast|multicast|selectcast|forbiddenBackendCastButAllowFrontendUnicast|forbiddenBackendCastButAllowFrontendMulticast|forbiddenBackendCastButAllowFrontendSelectcast
-    # 后置的forbiddenBackendCast为前缀的分发模式意思是：禁止后置发来的消息在后置中分发，它只能向前置分发，但前置发来的消息会根据前缀后面的模式在后置中分发
-    # 事件中心网络
-    - event-network:
-        title: 事件中心网络
-        frontend:
-          #每个前置的连接者能收到事件通知
-          #注意：事件中心不支持selectcast分发模式
-          castmode: multicast
-        backend:
-          #后边的管理员能收到所有事件通知
-          castmode: multicast
+    # 网络中前置frontend的分发模式castmode: unicast|multicast|selectcast|none. selectcast分发模式检查请求头中是否含有To-Peer或者To-User，将请求分发到该目标。如果同时均有则均发送
+    # 网络中后置backend的分发模式castmode：unicast|multicast|selectcastt
+    # 后置的成员的发送只能向前置成员分发，不能在后置成员中分发，但前置成员的发送可以分发到前后置成员
     #互动中心网络
     - interactive-center:
         title: 互动中心网络

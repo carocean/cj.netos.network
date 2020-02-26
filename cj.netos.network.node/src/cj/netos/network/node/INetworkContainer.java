@@ -10,8 +10,6 @@ import cj.ultimate.IClosable;
 public interface INetworkContainer extends IClosable {
     boolean isAutoCreate();
 
-    String getEventNetwork();
-
     INetwork openNetwork(String network);
 
     void createNetwork(IPrincipal principal, String name, String title, FrontendCastmode frontendCastmode, BackendCastmode backendCastmode) throws CircuitException;

@@ -17,9 +17,11 @@ public class DefaultPump implements IPump, INetworkServiceProvider {
     IKeySelector upstreamSelector;
     ITaskQueue downstreamTaskQueue;
     IKeySelector downstreamSelector;
+    private IEndpointerContainer endpointerContainer;
 
     @Override
     public void start(INetworkServiceProvider site) {
+        endpointerContainer = (IEndpointerContainer) site.getService("$.network.endpointerContainer");
         INetworkNodeConfig config = (INetworkNodeConfig) site.getService("$.network.config");
         PumpInfo info = config.getPumpInfo();
 
@@ -47,6 +49,9 @@ public class DefaultPump implements IPump, INetworkServiceProvider {
         }
         if ("$.pump.upstream.queue".equals(name)) {
             return upstreamTaskQueue;
+        }
+        if ("$.network.endpointerContainer".equals(name)) {
+            return endpointerContainer;
         }
         return null;
     }

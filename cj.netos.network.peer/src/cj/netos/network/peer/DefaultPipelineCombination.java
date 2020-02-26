@@ -21,7 +21,7 @@ public class DefaultPipelineCombination implements IPipelineCombination {
         pipeline.append(new IValve() {
             @Override
             public void flow(NetworkFrame frame, IPipeline pipeline) throws CircuitException {
-                if (!"NETWORK/1.0".equals(frame.protocol())) {
+                if ("NETWORK/1.0".equals(frame.protocol())) {
                     _flowSystem(frame, pipeline);
                     return;
                 }

@@ -6,6 +6,7 @@ import cj.netos.network.NetworkFrame;
 import cj.netos.network.node.ChannelWriter;
 import cj.netos.network.node.INetworkCommand;
 import cj.netos.network.node.INetworkContainer;
+import cj.netos.network.node.NetworkNodeConfig;
 import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.util.StringUtil;
 import io.netty.channel.Channel;
@@ -22,12 +23,11 @@ public class RemoveNetworkCommand implements INetworkCommand {
         }
         networkContainer.removeNetwork(name);
 
-        NetworkFrame back = new NetworkFrame("removeNetwork /system/notify/ network/1.0");
+        NetworkFrame back = new NetworkFrame(String.format("removeNetwork /%s network/1.0", name));
         if (principal != null) {
             back.head("sender-person", principal.principal());
             back.head("sender-peer", principal.peer());
         }
-        back.head("sender-network", name);
         channelWriter.write(channel, back);
     }
 
@@ -39,5 +39,6 @@ public class RemoveNetworkCommand implements INetworkCommand {
     public RemoveNetworkCommand(INetworkServiceProvider site) {
         networkContainer = (INetworkContainer) site.getService("$.network.networkContainer");
         channelWriter = new ChannelWriter();
+        NetworkNodeConfig config = (NetworkNodeConfig) site.getService("$.network.config");
     }
 }

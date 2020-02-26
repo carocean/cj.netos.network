@@ -3,10 +3,7 @@ package cj.netos.network.node.command;
 import cj.netos.network.INetworkServiceProvider;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
-import cj.netos.network.node.ChannelWriter;
-import cj.netos.network.node.INetwork;
-import cj.netos.network.node.INetworkCommand;
-import cj.netos.network.node.INetworkContainer;
+import cj.netos.network.node.*;
 import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.gson2.com.google.gson.Gson;
 import io.netty.buffer.ByteBuf;
@@ -33,7 +30,6 @@ public class ListNetworkCommand implements INetworkCommand {
         ByteBuf bb = Unpooled.buffer();
         Map<String, Object> info = new HashMap<>();
         info.put("isAutoCreate", networkContainer.isAutoCreate());
-        info.put("eventNetwork", networkContainer.getEventNetwork());
         List<Map<String, Object>> list = new ArrayList<>();
         for (String key : networkContainer.enumNetwork()) {
             INetwork nw = networkContainer.openNetwork(key);
@@ -52,7 +48,7 @@ public class ListNetworkCommand implements INetworkCommand {
         }
         info.put("networks", list);
         bb.writeBytes(new Gson().toJson(info).getBytes());
-        NetworkFrame back = new NetworkFrame(String.format("listNetwork /system/notify/ network/1.0"), bb);
+        NetworkFrame back = new NetworkFrame(String.format("listNetwork / network/1.0"), bb);
         if (principal != null) {
             back.head("sender-person", principal.principal());
             back.head("sender-peer", principal.peer());

@@ -24,16 +24,14 @@ public class ListenCommand extends Command implements IOnmessage {
 
     @Override
     public String cmdDesc() {
-        return "侦听网络。例：listen mynetwork。注：从网络窗口返回上级使用命令: cd ..";
+        return "侦听网络。例：listen mynetwork -j backend:downstream。注：从网络窗口返回上级使用命令: cd ..";
     }
 
     @Override
     public Options options() {
         Options options = new Options();
-        Option b = new Option("b", "backend", true, "[可选]是否从网络的后置侦听，默认是前置");
+        Option b = new Option("j", "join", true, "[可选]加入方式，格式是'前后:侦听模式'，默认是frontend:both。前为frontend，后为backend；侦听模式为：upstream｜downstream｜both，默认是both");
         options.addOption(b);
-        Option mode = new Option("m", "listenMode", true, "[可选]侦听模式：upstream｜downstream｜both，默认是both");
-        options.addOption(mode);
         return options;
     }
 
@@ -47,16 +45,27 @@ public class ListenCommand extends Command implements IOnmessage {
             return true;
         }
         String name = args.get(0);
-        String isBackend = line.getOptionValue("b");
-        if (StringUtil.isEmpty(isBackend)) {
-            isBackend = "false";
+        String join = line.getOptionValue("j");
+        if (StringUtil.isEmpty(join)) {
+            join = "frontend:both";
         }
-        String _listenmode = line.getOptionValue("m");
-        if (StringUtil.isEmpty(_listenmode)) {
-            _listenmode = "both";
+        int pos = join.indexOf(":");
+        if (pos < 0) {
+            System.out.println(String.format("错误参数：-j"));
+            return true;
         }
-        ListenMode mode = ListenMode.valueOf(_listenmode);
-        ILogicNetwork logicNetwork = peer.listen(name, !Boolean.valueOf(isBackend),mode);
+        String prev = join.substring(0, pos);
+        boolean isFrontend = true;
+        switch (prev) {
+            case "frontend":
+                isFrontend = true;
+                break;
+            case "backend":
+                isFrontend = false;
+                break;
+        }
+        ListenMode _mode = ListenMode.valueOf(join.substring(pos + 1));
+        ILogicNetwork logicNetwork = peer.listen(name, isFrontend, _mode);
         logicNetwork.onmessage(this);
         Scanner scanner = new Scanner(System.in);
         IMonitor console = new NetworkMonitor(scanner, logicNetwork);

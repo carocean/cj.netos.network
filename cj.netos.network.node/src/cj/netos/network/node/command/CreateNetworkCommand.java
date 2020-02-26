@@ -4,6 +4,7 @@ import cj.netos.network.*;
 import cj.netos.network.node.ChannelWriter;
 import cj.netos.network.node.INetworkCommand;
 import cj.netos.network.node.INetworkContainer;
+import cj.netos.network.node.NetworkNodeConfig;
 import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.util.StringUtil;
 import io.netty.channel.Channel;
@@ -44,7 +45,7 @@ public class CreateNetworkCommand implements INetworkCommand {
         }
         networkContainer.createNetwork(principal, name, title, frontendCastmode, backendCastmode);
 
-        NetworkFrame back = new NetworkFrame("createNetwork /system/notify/ network/1.0");
+        NetworkFrame back = new NetworkFrame(String.format("createNetwork / network/1.0"));
         if (principal != null) {
             back.head("sender-person", principal.principal());
             back.head("sender-peer", principal.peer());

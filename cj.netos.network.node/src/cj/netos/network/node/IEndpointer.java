@@ -7,4 +7,12 @@ public interface IEndpointer {
 
     void close();
 
+    boolean hasListenNetwork(String network);
+
+    void addListenNetwork(String network);
+
+    void removeListenNetwork(String network);
+
+    String[] listenNetworks();
+
 }

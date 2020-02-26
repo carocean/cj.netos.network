@@ -3,15 +3,25 @@ package cj.netos.network.node;
 import cj.netos.network.IPrincipal;
 import cj.netos.network.NetworkFrame;
 import cj.studio.ecm.net.CircuitException;
+import com.leansoft.bigqueue.BigQueueImpl;
 import com.leansoft.bigqueue.IBigQueue;
 
+import java.io.File;
 import java.io.IOException;
 
 public class DefaultStreamSink implements IStreamSink {
     IBigQueue queue;
 
-    public DefaultStreamSink(IBigQueue queue) {
-        this.queue = queue;
+    public DefaultStreamSink(String path,String network) throws CircuitException {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        try {
+            queue = new BigQueueImpl(path, network);
+        } catch (IOException e) {
+            throw new CircuitException("404", e);
+        }
     }
     @Override
     public void close() {

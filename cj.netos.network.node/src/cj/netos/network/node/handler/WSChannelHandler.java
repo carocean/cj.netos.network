@@ -113,10 +113,10 @@ public class WSChannelHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
         ctx.channel().attr(AttributeKey.valueOf("Net-Protocol")).set("websocket");
         pipeline.attachment(ctx.channel());
         combination.combine(pipeline);
-        super.channelActive(ctx);
     }
 
     @Override
