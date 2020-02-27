@@ -1,5 +1,7 @@
 package cj.netos.network.peer;
 
+import java.util.Map;
+
 public interface IOnreconnection {
-    void onreconnect();
+    void onreconnected(String protocol, String host, int port, Map<String, String> props);
 }

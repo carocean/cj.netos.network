@@ -35,10 +35,10 @@ public class Peer implements IPeer {
     }
 
     public static IPeer connect(String url) {
-        return connect(url, null, null,null);
+        return connect(url, null, null,null,null);
     }
 
-    public static IPeer connect(String url, IOnopen onopen, IOnclose onclose,IOnnotify onnotify) {
+    public static IPeer connect(String url, IOnopen onopen, IOnclose onclose,IOnreconnection onreconnection,IOnnotify onnotify) {
         int pos = url.indexOf("://");
         if (pos < 0) {
             throw new EcmException("地址格式错误:" + url);
@@ -71,11 +71,13 @@ public class Peer implements IPeer {
         switch (protocol) {
             case "tcp":
                 connection = new TcpConnection(onopen, onclose,onnotify);
+                connection.accept(onreconnection);
                 connection.connect(protocol, ip, port, props);
                 break;
             case "ws":
             case "wss":
                 connection = new WSConnection(onopen, onclose,onnotify);
+                connection.accept(onreconnection);
                 connection.connect(protocol, ip, port, props);
                 break;
             default:
@@ -197,7 +199,7 @@ public class Peer implements IPeer {
         }
 
         @Override
-        public void onreconnect() {
+        public void onreconnected(String protocol, String host, int port, Map<String, String> props) {
             authByPassword(peer, person, password);
         }
     }
@@ -206,7 +208,7 @@ public class Peer implements IPeer {
         String accessToken;
 
         @Override
-        public void onreconnect() {
+        public void onreconnected(String protocol, String host, int port, Map<String, String> props) {
             authByAccessToken(accessToken);
         }
 

@@ -45,13 +45,12 @@ class WSClientHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        handshaker.handshake(ctx.channel());
         pipeline = new DefaultPipeline(site);
         IPipelineCombination combination = (IPipelineCombination) site.getService("$.pipelineCombination");
         combination.combine(pipeline);
         IConnection connection =(IConnection) site.getService("$.connection");
         connection.onopen();
-
-        handshaker.handshake(ctx.channel());
     }
 
     @Override

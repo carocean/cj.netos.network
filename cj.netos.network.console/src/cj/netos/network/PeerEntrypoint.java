@@ -7,6 +7,7 @@ import org.apache.log4j.PropertyConfigurator;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Map;
 
 public class PeerEntrypoint {
 
@@ -50,6 +51,11 @@ public class PeerEntrypoint {
                 System.exit(0);
             }
 
+        }, new IOnreconnection() {
+            @Override
+            public void onreconnected(String protocol, String host, int port, Map<String, String> props) {
+
+            }
         }, new IOnnotify() {
             @Override
             public void onevent(NetworkFrame frame) {

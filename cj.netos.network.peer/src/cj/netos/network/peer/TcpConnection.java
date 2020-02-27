@@ -160,7 +160,7 @@ public class TcpConnection implements IConnection, IReconnection, INetworkServic
         }
         connect(protocol, host, port, map);
         if (onreconnection != null) {
-            onreconnection.onreconnect();
+            onreconnection.onreconnected(protocol, host, port, map);
         }
     }
 

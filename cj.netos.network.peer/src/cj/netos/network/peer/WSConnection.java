@@ -3,9 +3,6 @@ package cj.netos.network.peer;
 import cj.netos.network.*;
 import cj.netos.network.util.PropUtil;
 import cj.studio.ecm.CJSystem;
-import cj.studio.ecm.IServiceProvider;
-import cj.studio.ecm.ServiceCollection;
-import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.util.StringUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -35,7 +32,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class WSConnection implements IConnection, IReconnection, INetworkServiceProvider {
@@ -177,7 +173,7 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
         }
         connect(protocol, host, port, map);
         if (onreconnection != null) {
-            onreconnection.onreconnect();
+            onreconnection.onreconnected(protocol, host, port, map);
         }
     }
 
