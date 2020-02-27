@@ -165,8 +165,7 @@ class CastFrameToEndport implements IReceiver {
 
     private void _frontend_selectcast_whole(NetworkFrame frame, String to_person, String to_peer, INetwork network, ILine line) throws CircuitException {
         String key = String.format("%s/%s", to_person, to_peer);
-        if (!network.hasMemberInFrontend(key) && !network.hasMemberInBackend(key)) {
-            CJSystem.logging().warn(getClass(), String.format("发送目标：%s/%s不是本网络成员，侦丢弃。%s", to_person, to_peer, frame));
+        if (!network.hasMemberInFrontend(key)) {
             return;
         }
         IEndport endport = endportContainer.openport(key);
@@ -270,8 +269,8 @@ class CastFrameToEndport implements IReceiver {
 
     private void _backend_selectcast_whole(NetworkFrame frame, String to_person, String to_peer, INetwork network, ILine line) throws CircuitException {
         String key = String.format("%s/%s", to_person, to_peer);
-        if (!network.hasMemberInFrontend(key) && !network.hasMemberInBackend(key)) {
-            CJSystem.logging().warn(getClass(), String.format("发送目标：%s/%s不是本网络成员，侦丢弃。%s", to_person, to_peer, frame));
+        if (!network.hasMemberInBackend(key)) {
+//            CJSystem.logging().warn(getClass(), String.format("发送目标：%s/%s不是本网络成员，侦丢弃。%s", to_person, to_peer, frame));
             return;
         }
         IEndport endport = endportContainer.openport(key);
