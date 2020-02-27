@@ -52,7 +52,7 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
     private long reconnect_times;
     private long reconnect_interval;
     private int workThreadCount;
-    private boolean forbiddenReconnect;
+    private volatile boolean forbiddenReconnect;
     private String wspath;
     int maxContentLength;
 
@@ -285,7 +285,13 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
 
     @Override
     public void close() {
+        forbiddenReconnect();
         channel.close();
+        this.exepool.shutdownGracefully();
+        this.channel=null;
+        this.props.clear();
+        this.pipelineCombination=null;
+        this.onreconnection=null;
     }
 
     class WebsocketClientGatewaySocketInitializer extends ChannelInitializer<SocketChannel> {

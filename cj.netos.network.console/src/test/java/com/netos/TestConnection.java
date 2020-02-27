@@ -15,7 +15,8 @@ public class TestConnection {
         IConnection connection = new TcpConnection(null,null,null);
         Map<String, String> props = new HashMap<>();
         props.put("heartbeat","5");
-        connection.connect("tcp", "localhost", 6600, props);
+        connection.connect("wss", "localhost", 6600, props);
+        connection.close();
         return connection;
     }
 

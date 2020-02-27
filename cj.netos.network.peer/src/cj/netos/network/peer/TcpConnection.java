@@ -33,7 +33,7 @@ public class TcpConnection implements IConnection, IReconnection, INetworkServic
     private long reconnect_times;
     private long reconnect_interval;
     private int workThreadCount;
-    private boolean forbiddenReconnect;
+    private volatile boolean forbiddenReconnect;
 
     DefaultPipelineCombination pipelineCombination;
     private IOnreconnection onreconnection;
@@ -232,12 +232,23 @@ public class TcpConnection implements IConnection, IReconnection, INetworkServic
 
     @Override
     public boolean isConnected() {
+        forbiddenReconnect();
         return channel.isWritable();
     }
 
     @Override
     public void close() {
+        forbiddenReconnect();
         channel.close();
+        if (exepool != null) {
+            this.exepool.shutdownGracefully();
+        }
+        this.channel=null;
+        if (props != null) {
+            this.props.clear();
+        }
+        this.pipelineCombination=null;
+        this.onreconnection=null;
     }
 
     class TcpClientGatewaySocketInitializer extends ChannelInitializer<SocketChannel> {
