@@ -28,7 +28,7 @@ public class DefaultPipelineCombination implements IPipelineCombination {
                 _flowCustom(frame, pipeline);
             }
 
-            private void _flowCustom(NetworkFrame frame, IPipeline pipeline) {
+            private void _flowCustom(NetworkFrame frame, IPipeline pipeline) throws CircuitException {
                 String network = frame.rootName();
                 ILogicNetwork nw = networkMap.get(network);
                 if (nw != null) {

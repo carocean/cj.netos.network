@@ -38,7 +38,7 @@ public class DefaultLogicNetwork implements ILogicNetwork {
         frame.url(old);
     }
 
-    public void fireOnmessage(NetworkFrame frame) {
+    public void fireOnmessage(NetworkFrame frame) throws CircuitException {
         if (onmessage != null) {
             String old = frame.url();
             String url = frame.relativeUrl();
