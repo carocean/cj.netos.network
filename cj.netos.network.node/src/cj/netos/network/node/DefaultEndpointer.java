@@ -27,7 +27,7 @@ public class DefaultEndpointer implements IEndpointer {
 
     @Override
     public void close() {
-        if (channel.isOpen()) {
+        if (channel!=null&&channel.isOpen()) {
             channel.close();
         }
         channel = null;
