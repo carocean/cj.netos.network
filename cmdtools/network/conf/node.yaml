@@ -48,6 +48,6 @@ networkContainer:
     - location-updater:
         title: 位置更新网络
         frontend:
-          castmode: multicast
+          castmode: selectcast
         backend:
           castmode: unicast

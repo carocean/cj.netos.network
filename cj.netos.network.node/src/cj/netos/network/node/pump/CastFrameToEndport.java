@@ -11,6 +11,7 @@ import cj.netos.network.node.eventloop.EventTask;
 import cj.studio.ecm.CJSystem;
 import cj.studio.ecm.net.CircuitException;
 import cj.ultimate.gson2.com.google.gson.Gson;
+import cj.ultimate.util.StringUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -41,7 +42,7 @@ class CastFrameToEndport implements IReceiver {
         map.put("cause", buffer.toString());
         bb.writeBytes(new Gson().toJson(map).getBytes());
 
-        NetworkFrame back = new NetworkFrame(String.format("error /%s network/1.0",task.getNetwork()), bb);
+        NetworkFrame back = new NetworkFrame(String.format("error /%s network/1.0", task.getNetwork()), bb);
         String key = task.getEndpointKey();
         int pos = key.indexOf("/");
         String person = key.substring(0, pos);
@@ -129,9 +130,43 @@ class CastFrameToEndport implements IReceiver {
     private void _frontend_selectcast(NetworkFrame frame, INetwork network, ILine line) throws CircuitException {
         String to_person = frame.head("to-person");
         String to_peer = frame.head("to-peer");
+        boolean is_toperson_empty = StringUtil.isEmpty(to_person);
+        boolean is_topeer_empty = StringUtil.isEmpty(to_peer);
+        if (is_toperson_empty && is_topeer_empty) {
+            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
+            return;
+        }
+        if (is_toperson_empty) {
+            //按peer查找person列表并都发，这很危险，如果用户之间有peer相同则信息等同于泄漏
+            List<String> persons = endportContainer.findPersonByPeer(to_peer);
+            if (persons == null || persons.isEmpty()) {
+                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
+                return;
+            }
+            for (String person : persons) {
+                _frontend_selectcast_whole(frame, person, to_peer, network, line);
+            }
+            return;
+        }
+        if (is_topeer_empty) {
+            //按person查找peer列表并都发
+            List<String> peers = endportContainer.findPeersByPerson(to_person);
+            if (peers == null || peers.isEmpty()) {
+                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
+                return;
+            }
+            for (String peer : peers) {
+                _frontend_selectcast_whole(frame, to_person, peer, network, line);
+            }
+            return;
+        }
+        _frontend_selectcast_whole(frame, to_person, to_peer, network, line);
+    }
+
+    private void _frontend_selectcast_whole(NetworkFrame frame, String to_person, String to_peer, INetwork network, ILine line) throws CircuitException {
         String key = String.format("%s/%s", to_person, to_peer);
         if (!network.hasMemberInFrontend(key)) {
-            CJSystem.logging().warn(getClass(), String.format("发送不目标：%s/%s不是本网络成员，侦丢弃。", to_person, to_peer));
+            CJSystem.logging().warn(getClass(), String.format("发送目标：%s/%s不是本网络成员，侦丢弃。%s", to_person, to_peer, frame));
             return;
         }
         IEndport endport = endportContainer.openport(key);
@@ -200,9 +235,43 @@ class CastFrameToEndport implements IReceiver {
     private void _backend_selectcast(NetworkFrame frame, INetwork network, ILine line) throws CircuitException {
         String to_person = frame.head("to-person");
         String to_peer = frame.head("to-peer");
+        boolean is_toperson_empty = StringUtil.isEmpty(to_person);
+        boolean is_topeer_empty = StringUtil.isEmpty(to_peer);
+        if (is_toperson_empty && is_topeer_empty) {
+            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
+            return;
+        }
+        if (is_toperson_empty) {
+            //按peer查找person列表并都发，这很危险，如果用户之间有peer相同则信息等同于泄漏
+            List<String> persons = endportContainer.findPersonByPeer(to_peer);
+            if (persons == null || persons.isEmpty()) {
+                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
+                return;
+            }
+            for (String person : persons) {
+                _backend_selectcast_whole(frame, person, to_peer, network, line);
+            }
+            return;
+        }
+        if (is_topeer_empty) {
+            //按person查找peer列表并都发
+            List<String> peers = endportContainer.findPeersByPerson(to_person);
+            if (peers == null || peers.isEmpty()) {
+                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
+                return;
+            }
+            for (String peer : peers) {
+                _backend_selectcast_whole(frame, to_person, peer, network, line);
+            }
+            return;
+        }
+        _backend_selectcast_whole(frame, to_person, to_peer, network, line);
+    }
+
+    private void _backend_selectcast_whole(NetworkFrame frame, String to_person, String to_peer, INetwork network, ILine line) throws CircuitException {
         String key = String.format("%s/%s", to_person, to_peer);
         if (!network.hasMemberInFrontend(key)) {
-            CJSystem.logging().warn(getClass(), String.format("发送不目标：%s/%s不是本网络成员，侦丢弃。", to_person, to_peer));
+            CJSystem.logging().warn(getClass(), String.format("发送目标：%s/%s不是本网络成员，侦丢弃。%s", to_person, to_peer, frame));
             return;
         }
         IEndport endport = endportContainer.openport(key);

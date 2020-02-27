@@ -8,19 +8,23 @@ import org.apache.jdbm.DB;
 import org.apache.jdbm.DBMaker;
 
 import java.io.File;
-import java.util.Map;
+import java.util.*;
 
-public class EndportContainer implements IEndportContainer ,IEndportInfoChanged{
+public class EndportContainer implements IEndportContainer, IEndportInfoChanged {
     final static String KEY_MAP = "endports";
     private final INetworkServiceProvider site;
     String homeDir;
     Map<String, byte[]> endportInfoMap;
     DB db;
+    Map<String, List<String>> _key_person_index;//key是person以索引peers
+    Map<String, List<String>> _key_peer_index;//key是peer以索引persons
 
     public EndportContainer(INetworkServiceProvider site) {
         INetworkNodeConfig config = (INetworkNodeConfig) site.getService("$.network.config");
         homeDir = config.home();
         this.site = site;
+        _key_peer_index = new HashMap<>();
+        _key_person_index = new HashMap<>();
         initDB();
     }
 
@@ -37,6 +41,10 @@ public class EndportContainer implements IEndportContainer ,IEndportInfoChanged{
             map = db.createHashMap(KEY_MAP);
         }
         endportInfoMap = map;
+        //建立索引
+        for (String key : map.keySet()) {
+            _addIndex(key);
+        }
     }
 
     @Override
@@ -53,7 +61,7 @@ public class EndportContainer implements IEndportContainer ,IEndportInfoChanged{
     public IEndport openport(String principalKey) throws CircuitException {
         if (endportInfoMap.containsKey(principalKey)) {
             byte[] b = endportInfoMap.get(principalKey);
-            EndportInfo info = EndportInfo.load(b,this);
+            EndportInfo info = EndportInfo.load(b, this);
             return new DefaultEndport(info, homeDir, site);
         }
         return _createEndport(principalKey);
@@ -64,6 +72,7 @@ public class EndportContainer implements IEndportContainer ,IEndportInfoChanged{
         info.principalKey = principalKey;
         endportInfoMap.put(info.principalKey, info.toBytes());
         db.commit();
+        _addIndex(principalKey);
         return new DefaultEndport(info, homeDir, site);
     }
 
@@ -71,11 +80,76 @@ public class EndportContainer implements IEndportContainer ,IEndportInfoChanged{
     public void addListenNetwork(EndportInfo info) {
         endportInfoMap.put(info.principalKey, info.toBytes());
         db.commit();
+        _addIndex(info.principalKey);
     }
 
     @Override
     public void removeNetworkListenmode(EndportInfo info) {
         endportInfoMap.remove(info.principalKey);
         db.commit();
+        _removeIndex(info.principalKey);
+    }
+
+
+    private void _addIndex(String key) {
+        int pos = key.indexOf("/");
+        if (pos < 1) {
+            return;
+        }
+        String person = key.substring(0, pos);
+        String peer = key.substring(pos + 1);
+        List<String> peers = _key_person_index.get(person);
+        if (peers == null) {
+            peers = new ArrayList<>();
+            _key_person_index.put(person, peers);
+        }
+        if (!peers.contains(peer)) {
+            peers.add(peer);
+        }
+        List<String> persons = _key_peer_index.get(peer);
+        if (persons == null) {
+            persons = new ArrayList<>();
+            _key_peer_index.put(peer, persons);
+        }
+        if (!persons.contains(person)) {
+            persons.add(person);
+        }
+    }
+
+    private void _removeIndex(String key) {
+        int pos = key.indexOf("/");
+        if (pos < 1) {
+            return;
+        }
+        String person = key.substring(0, pos);
+        String peer = key.substring(pos + 1);
+        List<String> peers = _key_person_index.get(person);
+        if (peers != null) {
+            peers.remove(peer);
+        }
+        List<String> persons = _key_peer_index.get(peer);
+        if (persons != null) {
+            persons.remove(person);
+        }
+    }
+
+    @Override
+    public List<String> findPersonByPeer(String peer) {
+        List<String> persons = _key_peer_index.get(peer);
+        if (persons == null) {
+            persons = new ArrayList<>();
+            _key_peer_index.put(peer, persons);
+        }
+        return persons;
+    }
+
+    @Override
+    public List<String> findPeersByPerson(String person) {
+        List<String> peers = _key_person_index.get(person);
+        if (peers == null) {
+            peers = new ArrayList<>();
+            _key_person_index.put(person, peers);
+        }
+        return peers;
     }
 }
