@@ -287,9 +287,13 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
     public void close() {
         forbiddenReconnect();
         channel.close();
-        this.exepool.shutdownGracefully();
+        if (exepool != null) {
+            this.exepool.shutdownGracefully();
+        }
         this.channel=null;
-        this.props.clear();
+        if (props != null) {
+            this.props.clear();
+        }
         this.pipelineCombination=null;
         this.onreconnection=null;
     }
