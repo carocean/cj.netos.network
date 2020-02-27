@@ -122,6 +122,15 @@ public class TcpConnection implements IConnection, IReconnection, INetworkServic
         if (onclose != null) {
             onclose.onclose();
         }
+        if (exepool != null) {
+            this.exepool.shutdownGracefully();
+        }
+        this.channel=null;
+        if (props != null) {
+            this.props.clear();
+        }
+        this.pipelineCombination=null;
+        this.onreconnection=null;
     }
 
     @Override
@@ -240,15 +249,6 @@ public class TcpConnection implements IConnection, IReconnection, INetworkServic
     public void close() {
         forbiddenReconnect();
         channel.close();
-        if (exepool != null) {
-            this.exepool.shutdownGracefully();
-        }
-        this.channel=null;
-        if (props != null) {
-            this.props.clear();
-        }
-        this.pipelineCombination=null;
-        this.onreconnection=null;
     }
 
     class TcpClientGatewaySocketInitializer extends ChannelInitializer<SocketChannel> {

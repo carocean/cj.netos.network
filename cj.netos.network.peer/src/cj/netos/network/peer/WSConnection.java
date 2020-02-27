@@ -139,6 +139,15 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
         if (onclose != null) {
             onclose.onclose();
         }
+        if (exepool != null) {
+            this.exepool.shutdownGracefully();
+        }
+        this.channel=null;
+        if (props != null) {
+            this.props.clear();
+        }
+        this.pipelineCombination=null;
+        this.onreconnection=null;
     }
 
     @Override
@@ -287,15 +296,6 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
     public void close() {
         forbiddenReconnect();
         channel.close();
-        if (exepool != null) {
-            this.exepool.shutdownGracefully();
-        }
-        this.channel=null;
-        if (props != null) {
-            this.props.clear();
-        }
-        this.pipelineCombination=null;
-        this.onreconnection=null;
     }
 
     class WebsocketClientGatewaySocketInitializer extends ChannelInitializer<SocketChannel> {
