@@ -85,7 +85,8 @@ class CastFrameToEndport implements IReceiver {
             if (network.getFrontendCastmode() != FrontendCastmode.none) {
                 _castToFrontend(frame, task, network, line);
             }
-            sink.removeFirst().close();
+            network.close();
+            sink.removeFirst();
         }
     }
 

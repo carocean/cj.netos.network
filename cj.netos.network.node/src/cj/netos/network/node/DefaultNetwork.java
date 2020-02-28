@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class DefaultNetwork implements INetwork {
 
-    private final NetworkInfo info;
+    private NetworkInfo info;
     private Map<String, byte[]> frontendMembers;
     private Map<String, byte[]> backendMembers;
     DB db;
@@ -41,8 +41,8 @@ public class DefaultNetwork implements INetwork {
 
     @Override
     public void close() {
-        db
-                .close();
+        db.close();
+        info=null;
     }
 
 
