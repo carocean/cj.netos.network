@@ -50,6 +50,12 @@ public class EndportContainer implements IEndportContainer, IEndportInfoChanged 
     @Override
     public void close() {
         db.close();
+        if (_key_peer_index != null) {
+            _key_peer_index.clear();
+        }
+        if (_key_person_index != null) {
+            _key_person_index.clear();
+        }
     }
 
     @Override
