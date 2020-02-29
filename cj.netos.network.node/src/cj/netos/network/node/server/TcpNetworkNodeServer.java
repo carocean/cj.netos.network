@@ -30,7 +30,6 @@ public class TcpNetworkNodeServer implements INetworkNodeServer, INetworkService
     private int workThreadCount;
     private ServerInfo serverInfo;
     private long heartbeat;
-    private long overtimes;
     private IPipelineCombination combination;
 
     public TcpNetworkNodeServer(INetworkServiceProvider site) {
@@ -48,9 +47,6 @@ public class TcpNetworkNodeServer implements INetworkNodeServer, INetworkService
         }
         if ("$.server.heartbeat".equals(serviceId)) {
             return heartbeat;
-        }
-        if ("$.server.overtimes".equals(serviceId)) {
-            return overtimes;
         }
 
         return site.getService(serviceId);
@@ -117,14 +113,8 @@ public class TcpNetworkNodeServer implements INetworkNodeServer, INetworkService
             this.heartbeat = Long.valueOf(ht);
         }
         if (this.heartbeat > 0) {
-            CJSystem.logging().info(getClass(), String.format("开启了心跳，策略：heartbeat=%s,overtimes=%s", heartbeat, overtimes));
+            CJSystem.logging().info(getClass(), String.format("开启了心跳，策略：heartbeat=%s", heartbeat));
         }
-        this.overtimes = 0;
-        String ot = PropUtil.getValue(props.get("overtimes"));
-        if (!StringUtil.isEmpty(ot)) {
-            this.overtimes = Long.valueOf(ot);
-        }
-
     }
 
 

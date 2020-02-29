@@ -29,7 +29,6 @@ public class WSNetworkNodeServer implements INetworkNodeServer, INetworkServiceP
     private int workThreadCount;
     private ServerInfo serverInfo;
     private long heartbeat;
-    private long overtimes;
     private int maxContentLength;
     private String wspath;
     private IPipelineCombination combination;
@@ -56,10 +55,6 @@ public class WSNetworkNodeServer implements INetworkNodeServer, INetworkServiceP
         if ("$.server.wspath".equals(serviceId)) {
             return wspath;
         }
-        if ("$.server.overtimes".equals(serviceId)) {
-            return overtimes;
-        }
-
         return site.getService(serviceId);
     }
 
@@ -125,7 +120,7 @@ public class WSNetworkNodeServer implements INetworkNodeServer, INetworkServiceP
             this.heartbeat = Long.valueOf(ht);
         }
         if (this.heartbeat > 0) {
-            CJSystem.logging().info(getClass(), String.format("开启了心跳，策略：heartbeat=%s,overtimes=%s", heartbeat, overtimes));
+            CJSystem.logging().info(getClass(), String.format("开启了心跳，策略：heartbeat=%s", heartbeat));
         }
 
         this.maxContentLength = 0;
@@ -140,12 +135,6 @@ public class WSNetworkNodeServer implements INetworkNodeServer, INetworkServiceP
         if (StringUtil.isEmpty(wspath)) {
             wspath = "/websocket";
         }
-        this.overtimes = 0;
-        String ot = PropUtil.getValue(props.get("overtimes"));
-        if (!StringUtil.isEmpty(ot)) {
-            this.overtimes = Long.valueOf(ot);
-        }
-
     }
 
 
