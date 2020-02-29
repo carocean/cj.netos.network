@@ -274,7 +274,6 @@ public class WSConnection implements IConnection, IReconnection, INetworkService
 
     @Override
     public void send(NetworkFrame frame) {
-        frame.head("Peer-Name", peerName);
         ByteBuf bb = Unpooled.buffer();
         byte[] b = frame.toBytes();
         frame.dispose();

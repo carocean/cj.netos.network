@@ -1,10 +1,9 @@
-
 server:
   #服务地址。目前支持的协议有：tcp,ws,wss,http,https
-  host: wss://localhost:6600
+  host: wss://localhost:6603
   #开放口地址，供客户端访问此networkNode节点。注意：开放口并不一定是当前所在主机的ip和端口号，比如常要用架构是前台一般用ngnix来导转到公网生产环境的内网服务器，如果想让客户端连上只能通过nginx与它相连，那这个开放口就是ngnix的代理地址。
   #简言之这个口就是手机能连的
-  openports: tcp://47.105.165.186:6600
+  openports: wss://47.105.165.186:6603/websocket
   props:
     #如果是ws|wss协议
     wspath:
@@ -29,7 +28,7 @@ pump:
       fileLength: 1048576
       #等待超时时间，单位毫秒
       waitTime: 5000
-    workThreadCount: 8
+    workThreadCount: 4
 networkContainer:
   #是否按请求地址上下文自动创建网络
   isAutoCreate: false
@@ -41,13 +40,19 @@ networkContainer:
     - interactive-center:
         title: 互动中心网络
         frontend:
-          castmode: multicast
+          castmode: selectcast
         backend:
           castmode: unicast
     #位置更新网络
     - location-updater:
         title: 位置更新网络
         frontend:
-          castmode: selectcast
-        backend:
           castmode: unicast
+        backend:
+          castmode: none
+    - document-publisher:
+        title: 文档发布中心
+        frontend:
+          castmode: unicast
+        backend:
+          castmode: none

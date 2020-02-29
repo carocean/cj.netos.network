@@ -14,6 +14,7 @@ import java.util.Set;
 public class Peer implements IPeer {
     IConnection connection;
     boolean isAuthed = false;
+    private IOnreconnection onreconnection;
 
     private Peer() {
     }
@@ -71,21 +72,19 @@ public class Peer implements IPeer {
         switch (protocol) {
             case "tcp":
                 connection = new TcpConnection(onopen, onclose,onnotify);
-                connection.accept(onreconnection);
                 connection.connect(protocol, ip, port, props);
                 break;
             case "ws":
             case "wss":
                 connection = new WSConnection(onopen, onclose,onnotify);
-                connection.accept(onreconnection);
                 connection.connect(protocol, ip, port, props);
                 break;
             default:
                 throw new EcmException("不支持的协议:" + protocol);
         }
-
         Peer peer = new Peer();
         peer.connection = connection;
+        peer.onreconnection=onreconnection;
         return peer;
     }
 
@@ -93,7 +92,7 @@ public class Peer implements IPeer {
     @Override
     public void authByPassword(String peer, String person, String password) {
         if (!connection.isForbiddenReconnect()) {
-            connection.accept(new ReAuthByPassword(peer, person, password));
+            connection.accept(new ReAuthByPassword(onreconnection,peer, person, password));
         }
         NetworkFrame frame = new NetworkFrame("auth / network/1.0");
         frame.head("auth-mode", "password");
@@ -107,7 +106,7 @@ public class Peer implements IPeer {
     @Override
     public void authByAccessToken(String accessToken) {
         if (!connection.isForbiddenReconnect()) {
-            connection.accept(new ReAuthByAccessToken(accessToken));
+            connection.accept(new ReAuthByAccessToken(onreconnection,accessToken));
         }
         NetworkFrame frame = new NetworkFrame("auth / network/1.0");
         frame.head("auth-mode", "accessToken");
@@ -191,29 +190,37 @@ public class Peer implements IPeer {
         private final String peer;
         private final String person;
         private final String password;
-
-        public ReAuthByPassword(String peer, String person, String password) {
+        IOnreconnection parent;
+        public ReAuthByPassword(IOnreconnection parent,String peer, String person, String password) {
             this.peer = peer;
             this.person = person;
             this.password = password;
+            this.parent=parent;
         }
 
         @Override
         public void onreconnected(String protocol, String host, int port, Map<String, String> props) {
             authByPassword(peer, person, password);
+            if (parent != null) {
+                parent.onreconnected(protocol,host,port,props);
+            }
         }
     }
 
     private class ReAuthByAccessToken implements IOnreconnection {
         String accessToken;
-
+        IOnreconnection parent;
         @Override
         public void onreconnected(String protocol, String host, int port, Map<String, String> props) {
             authByAccessToken(accessToken);
+            if (parent != null) {
+                parent.onreconnected(protocol,host,port,props);
+            }
         }
 
-        public ReAuthByAccessToken(String accessToken) {
+        public ReAuthByAccessToken(IOnreconnection parent,String accessToken) {
             this.accessToken = accessToken;
+            this.parent=parent;
         }
     }
 }

@@ -134,14 +134,14 @@ class CastFrameToEndport implements IReceiver {
         boolean is_toperson_empty = StringUtil.isEmpty(to_person);
         boolean is_topeer_empty = StringUtil.isEmpty(to_peer);
         if (is_toperson_empty && is_topeer_empty) {
-            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
+//            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
             return;
         }
         if (is_toperson_empty) {
             //按peer查找person列表并都发，这很危险，如果用户之间有peer相同则信息等同于泄漏
             List<String> persons = endportContainer.findPersonByPeer(to_peer);
             if (persons == null || persons.isEmpty()) {
-                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
+//                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
                 return;
             }
             for (String person : persons) {
@@ -153,7 +153,7 @@ class CastFrameToEndport implements IReceiver {
             //按person查找peer列表并都发
             List<String> peers = endportContainer.findPeersByPerson(to_person);
             if (peers == null || peers.isEmpty()) {
-                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
+//                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
                 return;
             }
             for (String peer : peers) {
@@ -176,20 +176,24 @@ class CastFrameToEndport implements IReceiver {
     }
 
     private void _frontend_multicast(NetworkFrame frame, EventTask task, INetwork network, ILine line) throws CircuitException {
-        String[] members = network.listFrontendMembers();
-        for (String key : members) {
-            //不发自身
-            if (key.equals(task.getEndpointKey())) {
-                continue;
+        try {
+            String[] members = network.listFrontendMembers();
+            for (String key : members) {
+                //不发自身
+                if (key.equals(task.getEndpointKey())) {
+                    continue;
+                }
+                IEndport endport = endportContainer.openport(key);
+                //对于只发送的侦听者拒发信息
+                if (endport.isListenMode(network.getName(), ListenMode.upstream)) {
+                    continue;
+                }
+                endport.openDownstream(network.getName()).write(frame.copy()).close();
+                EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
+                line.nextInput(downTask, this);
             }
-            IEndport endport = endportContainer.openport(key);
-            //对于只发送的侦听者拒发信息
-            if (endport.isListenMode(network.getName(), ListenMode.upstream)) {
-                continue;
-            }
-            endport.openDownstream(network.getName()).write(frame).close();
-            EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
-            line.nextInput(downTask, this);
+        }finally {
+            frame.dispose();
         }
     }
 
@@ -238,14 +242,14 @@ class CastFrameToEndport implements IReceiver {
         boolean is_toperson_empty = StringUtil.isEmpty(to_person);
         boolean is_topeer_empty = StringUtil.isEmpty(to_peer);
         if (is_toperson_empty && is_topeer_empty) {
-            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
+//            CJSystem.logging().warn(getClass(), "发送目标不确定：to_person和to_peer请求头均为空，侦丢弃。" + frame);
             return;
         }
         if (is_toperson_empty) {
             //按peer查找person列表并都发，这很危险，如果用户之间有peer相同则信息等同于泄漏
             List<String> persons = endportContainer.findPersonByPeer(to_peer);
             if (persons == null || persons.isEmpty()) {
-                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
+//                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
                 return;
             }
             for (String person : persons) {
@@ -257,7 +261,7 @@ class CastFrameToEndport implements IReceiver {
             //按person查找peer列表并都发
             List<String> peers = endportContainer.findPeersByPerson(to_person);
             if (peers == null || peers.isEmpty()) {
-                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
+//                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
                 return;
             }
             for (String peer : peers) {
@@ -281,20 +285,24 @@ class CastFrameToEndport implements IReceiver {
     }
 
     private void _backend_multicast(NetworkFrame frame, EventTask task, INetwork network, ILine line) throws CircuitException {
-        String[] members = network.listBackendMembers();
-        for (String key : members) {
-            //不发自身
-            if (key.equals(task.getEndpointKey())) {
-                continue;
+        try {
+            String[] members = network.listBackendMembers();
+            for (String key : members) {
+                //不发自身
+                if (key.equals(task.getEndpointKey())) {
+                    continue;
+                }
+                IEndport endport = endportContainer.openport(key);
+                //对于只发送的侦听者拒发信息
+                if (endport.isListenMode(network.getName(), ListenMode.upstream)) {
+                    continue;
+                }
+                endport.openDownstream(network.getName()).write(frame.copy()).close();
+                EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
+                line.nextInput(downTask, this);
             }
-            IEndport endport = endportContainer.openport(key);
-            //对于只发送的侦听者拒发信息
-            if (endport.isListenMode(network.getName(), ListenMode.upstream)) {
-                continue;
-            }
-            endport.openDownstream(network.getName()).write(frame).close();
-            EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
-            line.nextInput(downTask, this);
+        }finally {
+            frame.dispose();
         }
     }
 }
