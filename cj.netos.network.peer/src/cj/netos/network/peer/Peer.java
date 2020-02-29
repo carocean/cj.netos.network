@@ -45,28 +45,35 @@ public class Peer implements IPeer {
             throw new EcmException("地址格式错误:" + url);
         }
         String protocol = url.substring(0, pos);
-        String remain = url.substring(pos + "://".length(), url.length());
-        pos = remain.indexOf(":");
-        int port = 0;
-        String ip = "";
+        String remain = url.substring(pos + "://".length());
+        pos = remain.indexOf("?");
         Map<String, String> props = new HashMap<>();
+        String conn="";
+        if (pos<1) {
+            conn=remain;
+        }else{
+            conn = remain.substring(0, pos);
+            String qs = remain.substring(pos + 1);
+            parseProps(qs,props);
+        }
+        String domain="";
+        String relurl="";
+        pos = conn.indexOf("/");
+        if (pos < 1) {
+            domain = conn;
+        }else{
+            domain = conn.substring(0, pos);
+            relurl = conn.substring(pos + 1);
+        }
+        String ip="";
+        int port=0;
+        pos = domain.indexOf(":");
         if (pos < 0) {
-            ip = remain;
-            port = 80;
-        } else {
-            ip = remain.substring(0, pos);
-            remain = remain.substring(pos + 1, remain.length());
-            pos = remain.indexOf("?");
-            if (pos < 0) {
-                String strPort = remain;
-                port = Integer.valueOf(strPort);
-
-            } else {
-                String strPort = remain.substring(0, pos);
-                port = Integer.valueOf(strPort);
-                remain = remain.substring(pos + 1, remain.length());
-                parseProps(remain, props);
-            }
+            ip=domain;
+            port=80;
+        }else{
+            ip = domain.substring(0, pos);
+            port = Integer.valueOf(domain.substring(pos + 1));
         }
         IConnection connection = null;
         switch (protocol) {
@@ -76,6 +83,9 @@ public class Peer implements IPeer {
                 break;
             case "ws":
             case "wss":
+                if (!StringUtil.isEmpty(relurl)&&!props.containsKey("wspath")) {
+                    props.put("wspath", relurl);
+                }
                 connection = new WSConnection(onopen, onclose,onnotify);
                 connection.connect(protocol, ip, port, props);
                 break;
