@@ -42,7 +42,7 @@ networkContainer:
         frontend:
           castmode: selectcast
         backend:
-          castmode: unicast
+          castmode: none
     #位置更新网络
     - location-updater:
         title: 位置更新网络
