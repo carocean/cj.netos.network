@@ -13,5 +13,6 @@ public interface ITaskQueue extends IDisposable {
     void append(EventTask e);
 
 
+
     void close();
 }

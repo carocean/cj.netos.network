@@ -15,6 +15,7 @@ public class DiskStreamTaskQueue implements ITaskQueue {
     IBigQueue bigQueue;
     ReentrantLock lock;
     Condition readToWPointerCondition;
+
     @Override
     public void init(String queueDir, String queueName) {
         lock = new ReentrantLock();
@@ -34,20 +35,18 @@ public class DiskStreamTaskQueue implements ITaskQueue {
     public EventTask selectOne(long longTime, TimeUnit timeUnit) {
         byte[] b = null;
         try {
+            lock.lock();
             b = bigQueue.dequeue();
+            if (b == null) {
+                readToWPointerCondition.await(longTime, timeUnit);
+                return selectOne(longTime, timeUnit);
+            }
         } catch (IOException e) {
             throw new EcmException(e);
-        }
-        if (b == null) {
-            try {
-                lock.lock();
-                readToWPointerCondition.await(longTime,timeUnit);
-                return selectOne(longTime,timeUnit);
-            } catch (InterruptedException e) {
-                throw new EcmException(e);
-            } finally {
-                lock.unlock();
-            }
+        } catch (InterruptedException e) {
+            throw new EcmException(e);
+        } finally {
+            lock.unlock();
         }
         EventTask e = new Gson().fromJson(new String(b), EventTask.class);
         return e;
@@ -62,12 +61,11 @@ public class DiskStreamTaskQueue implements ITaskQueue {
         }
         try {
             lock.lock();
-            readToWPointerCondition.signalAll();
+            readToWPointerCondition.signal();
         } finally {
             lock.unlock();
         }
     }
-
 
     @Override
     public void close() {
