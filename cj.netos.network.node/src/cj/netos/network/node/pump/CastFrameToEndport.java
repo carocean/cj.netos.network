@@ -80,11 +80,12 @@ class CastFrameToEndport implements IReceiver {
             //只处理与task的网络一致的请求，不一定的将让给别的线程或下一次处理
             INetwork network = networkContainer.openNetwork(networkName);
             if (network.getBackendCastmode() != BackendCastmode.none && !network.hasMemberInBackend(task.getEndpointKey())) {
-                _castToBackend(frame, task, network, line);
+                _castToBackend(frame.copy(), task, network, line);
             }
             if (network.getFrontendCastmode() != FrontendCastmode.none) {
-                _castToFrontend(frame, task, network, line);
+                _castToFrontend(frame.copy(), task, network, line);
             }
+            frame.dispose();
             network.close();
             sink.removeFirst();
         }
