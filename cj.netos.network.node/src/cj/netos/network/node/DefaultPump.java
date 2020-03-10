@@ -30,8 +30,8 @@ public class DefaultPump implements IPump, INetworkServiceProvider {
         IEndportContainer endportContainer = (IEndportContainer) site.getService("$.network.endportContainer");
         IEndpointerContainer endpointerContainer = (IEndpointerContainer) site.getService("$.network.endpointerContainer");
 
-        buildUpstreamEventloop(info, config, networkContainer, endportContainer);
         buildDownstreamEventloop(info, config, endpointerContainer, endportContainer);
+        buildUpstreamEventloop(info, config, networkContainer, endportContainer);
     }
 
     @Override
