@@ -145,8 +145,12 @@ class CastFrameToEndport implements IReceiver {
 //                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
                 return;
             }
-            for (String person : persons) {
-                _frontend_selectcast_whole(frame, person, to_peer, network, line);
+            try {
+                for (String person : persons) {
+                    _frontend_selectcast_whole(frame.copy(), person, to_peer, network, line);
+                }
+            } finally {
+                frame.dispose();
             }
             return;
         }
@@ -157,8 +161,12 @@ class CastFrameToEndport implements IReceiver {
 //                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
                 return;
             }
-            for (String peer : peers) {
-                _frontend_selectcast_whole(frame, to_person, peer, network, line);
+            try {
+                for (String peer : peers) {
+                    _frontend_selectcast_whole(frame.copy(), to_person, peer, network, line);
+                }
+            } finally {
+                frame.dispose();
             }
             return;
         }
@@ -193,7 +201,7 @@ class CastFrameToEndport implements IReceiver {
                 EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
                 line.nextInput(downTask, this);
             }
-        }finally {
+        } finally {
             frame.dispose();
         }
     }
@@ -253,8 +261,12 @@ class CastFrameToEndport implements IReceiver {
 //                CJSystem.logging().warn(getClass(), String.format("该peer:%s没有关联的person，侦丢弃。%s", to_peer, frame));
                 return;
             }
-            for (String person : persons) {
-                _backend_selectcast_whole(frame, person, to_peer, network, line);
+            try {
+                for (String person : persons) {
+                    _backend_selectcast_whole(frame.copy(), person, to_peer, network, line);
+                }
+            } finally {
+                frame.dispose();
             }
             return;
         }
@@ -265,8 +277,12 @@ class CastFrameToEndport implements IReceiver {
 //                CJSystem.logging().warn(getClass(), String.format("该person:%s没有关联的peer，侦丢弃。%s", to_person, frame));
                 return;
             }
-            for (String peer : peers) {
-                _backend_selectcast_whole(frame, to_person, peer, network, line);
+            try {
+                for (String peer : peers) {
+                    _backend_selectcast_whole(frame.copy(), to_person, peer, network, line);
+                }
+            } finally {
+                frame.dispose();
             }
             return;
         }
@@ -302,7 +318,7 @@ class CastFrameToEndport implements IReceiver {
                 EventTask downTask = new EventTask(Direction.downstream, key, network.getName());
                 line.nextInput(downTask, this);
             }
-        }finally {
+        } finally {
             frame.dispose();
         }
     }
